@@ -24,8 +24,28 @@ class BoardDetailForm extends StatelessWidget {
     required this.onCancel,
   }) : super(key: key);
 
+  List<Status> getAvailableStatuses(String currentStatus) {
+    switch (currentStatus) {
+      case 'pending':
+        return statusList.where((s) => s.name == 'pending' || s.name == 'in_progress').toList();
+      case 'in_progress':
+        return statusList.where((s) => s.name == 'in_progress' || s.name == 'done').toList();
+      case 'done':
+        return statusList.where((s) => s.name == 'done').toList();
+      default:
+        return statusList;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+final currentStatus = statusList.firstWhere(
+  (status) => status.id == board.statusId,
+  orElse: () => Status(id: 1, name: 'pending', color: 'gray'),
+).name;
+    final availableStatuses = getAvailableStatuses(currentStatus);
+    final isDone = currentStatus == 'done';
+
     return AlertDialog(
       title: Text("Detail Board"),
       content: SingleChildScrollView(
@@ -56,17 +76,19 @@ class BoardDetailForm extends StatelessWidget {
                 labelText: "Status",
                 border: OutlineInputBorder(),
               ),
-              items: statusList.map((status) {
+              items: availableStatuses.map((status) {
                 return DropdownMenuItem<String>(
                   value: status.name,
                   child: Text(getDisplayLabel(status.name)),
                 );
               }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  onStatusSelected(value);
-                }
-              },
+              onChanged: isDone
+                  ? null // disable jika status sudah 'done'
+                  : (value) {
+                      if (value != null) {
+                        onStatusSelected(value);
+                      }
+                    },
             ),
           ],
         ),

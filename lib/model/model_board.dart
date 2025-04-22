@@ -6,39 +6,41 @@ class Board {
   final int? titleBoardId;
   final int? tasksId;
   final DateTime? dueDate;
+  final DateTime? doneDate; // ✅ Tambahkan ini
 
+  Board({
+    this.id,
+    required this.title,
+    this.description,
+    this.statusId,
+    this.titleBoardId,
+    this.tasksId,
+    this.dueDate,
+    this.doneDate, // ✅
+  });
 
-Board({
-  this.id,
-  required this.title,
-  this.description,
-  this.statusId,
-  this.titleBoardId,
-  this.tasksId,
-  this.dueDate, // ✅ Tambah ini
-});
+  factory Board.fromJson(Map<String, dynamic> json) {
+    return Board(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      statusId: json['status_id'],
+      titleBoardId: json['title_board_id'],
+      tasksId: json['tasks_id'],
+      dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
+      doneDate: json['done_date'] != null ? DateTime.parse(json['done_date']) : null, // ✅
+    );
+  }
 
-factory Board.fromJson(Map<String, dynamic> json) {
-  return Board(
-    id: json['id'],
-    title: json['title'],
-    description: json['description'],
-    statusId: json['status_id'],
-    titleBoardId: json['title_board_id'],
-    tasksId: json['tasks_id'],
-    dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null, // ✅
-  );
-}
-
-Map<String, dynamic> toJson() {
-  return {
-    'title': title,
-    'description': description,
-    'status_id': statusId,
-    'title_board_id': titleBoardId,
-    'tasks_id': tasksId,
-    'due_date': dueDate?.toIso8601String(), // ✅
-  };
-}
-
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'status_id': statusId,
+      'title_board_id': titleBoardId,
+      'tasks_id': tasksId,
+      'due_date': dueDate?.toIso8601String(),
+      'done_date': doneDate?.toIso8601String(), // ✅
+    };
+  }
 }

@@ -553,7 +553,7 @@ final int statusId = selectedStatusObject.id ?? 1;
 
   String getDisplayLabel(String statusName) {
     switch (statusName) {
-      case 'pending': return 'Pending';
+      case 'pending': return 'Not Started';
       case 'in_progress': return 'In Progress';
       case 'done': return 'Done';
       default: return statusName;
@@ -570,120 +570,132 @@ final int statusId = selectedStatusObject.id ?? 1;
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              TaskHeader(
-                taskName: widget.task.name,
-                priority: widget.task.priority,
-                onAdd: showOptionDialog,
-                onBack: () => Navigator.pop(context),
-                getPriorityColor: getPriorityColor,
-              ),
-              const SizedBox(height: 10),
-              if (isBoardAdded) 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: BoardsSection(
-                    statusList: statusList,
-                    boardsByStatus: boardsByStatus,
-                    getStatusColor: getStatusColor,
-                    getDisplayLabel: getDisplayLabel,
-                    onBoardTap: showBoardDetailDialog,
-                    onAddBoard: (statusName) {
-                      setState(() => selectedStatus = statusName);
-                      showAddBoardDialog();
-                    },
-                  ),
-                ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: explanations.length,
-                  itemBuilder: (context, index) {
-                    final item = explanations[index];
-                    final isEditing = editingId == item.id;
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    body: Stack(
+      children: [
+        Column(
+          children: [
+            TaskHeader(
+              taskName: widget.task.name,
+              priority: widget.task.priority,
+              onAdd: showOptionDialog,
+              onBack: () => Navigator.pop(context),
+              getPriorityColor: getPriorityColor,
+            ),
+            const SizedBox(height: 10),
 
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          editingId = item.id;
-                          editingNameController.text = item.name;
-                          editingDeskripsiController.text = item.deskripsi ?? '';
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            isEditing
-                                ? TextField(
-                                    controller: editingNameController,
-                                    focusNode: FocusNode(),
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                    cursorColor: Colors.black,
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      border: InputBorder.none,
-                                    ),
-                                    onEditingComplete: () => saveEditedExplanation(item),
-                                  )
-                                : Text(
-                                    item.name,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                            SizedBox(height: 4),
-                            isEditing
-                                ? TextField(
-                                    controller: editingDeskripsiController,
-                                    focusNode: FocusNode(),
-                                    style: TextStyle(fontSize: 16, color: Colors.black),
-                                    cursorColor: Colors.black,
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      border: InputBorder.none,
-                                    ),
-                                    maxLines: null,
-                                    onEditingComplete: () => saveEditedExplanation(item),
-                                  )
-                                : Text(
-                                    item.deskripsi ?? '',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                            SizedBox(height: 8),
-                          ],
+            // Membungkus bagian konten setelah TaskHeader dengan SingleChildScrollView
+            Expanded(
+              child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (isBoardAdded) 
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: BoardsSection(
+                            statusList: statusList,
+                            boardsByStatus: boardsByStatus,
+                            getStatusColor: getStatusColor,
+                            getDisplayLabel: getDisplayLabel,
+                            onBoardTap: showBoardDetailDialog,
+                            onAddBoard: (statusName) {
+                              setState(() => selectedStatus = statusName);
+                              showAddBoardDialog();
+                            },
+                          ),
                         ),
+                      const SizedBox(height: 10),
+                      // Expanded digunakan di dalam ListView untuk menjaga panjangnya agar tetap responsif
+                      ListView.builder(
+                        shrinkWrap: true, // Membuat ListView tidak menghabiskan ruang secara penuh
+                        itemCount: explanations.length,
+                        itemBuilder: (context, index) {
+                          final item = explanations[index];
+                          final isEditing = editingId == item.id;
+              
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                editingId = item.id;
+                                editingNameController.text = item.name;
+                                editingDeskripsiController.text = item.deskripsi ?? '';
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  isEditing
+                                      ? TextField(
+                                          controller: editingNameController,
+                                          focusNode: FocusNode(),
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                          cursorColor: Colors.black,
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            border: InputBorder.none,
+                                          ),
+                                          onEditingComplete: () => saveEditedExplanation(item),
+                                        )
+                                      : Text(
+                                          item.name,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                  SizedBox(height: 4),
+                                  isEditing
+                                      ? TextField(
+                                          controller: editingDeskripsiController,
+                                          focusNode: FocusNode(),
+                                          style: TextStyle(fontSize: 16, color: Colors.black),
+                                          cursorColor: Colors.black,
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            border: InputBorder.none,
+                                          ),
+                                          maxLines: null,
+                                          onEditingComplete: () => saveEditedExplanation(item),
+                                        )
+                                      : Text(
+                                          item.deskripsi ?? '',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                  SizedBox(height: 8),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          if (isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: Center(
-                child: CircularProgressIndicator(),
+                    ],
+                  ),
+                        
               ),
             ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+        if (isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.3),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
 }

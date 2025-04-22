@@ -6,7 +6,7 @@ class HomeAppbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  Container(
-            height: 90,
+            height: 280,
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [Color.fromRGBO(19, 86, 148, 1), Color.fromRGBO(0, 102, 204, 1)])
             ),
@@ -49,62 +49,63 @@ class HomeAppbar extends StatelessWidget {
                       ))
                   ],
                 ),
-                // Row(
-                //   children: [
-                //     Container(
-                //       margin: EdgeInsets.only(left: 15),
-                //       height: 150,
-                //       width: 180,
-                //       decoration: BoxDecoration(
-                //       color: Color.fromRGBO(202, 225, 255, 1),
-                //         borderRadius: BorderRadius.circular(20)
-                //       ),
-                //       child: Column(
-                //         children: [
-                //           Row(
-                //             mainAxisAlignment: MainAxisAlignment.center,
-                //             children: [
-                //               Container(
-                //                 margin: EdgeInsets.only(top: 10),
-                //                 child: Text("Today's Task Complete",style: TextStyle(color: Color.fromRGBO(13, 71, 161, 1),fontFamily: "Mont-SemiBold", fontSize: 11),))
-                //             ],
-                //           ),
-                //           Row(
-                //             children: [
+                SizedBox(height: 20,),
+                Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(left: 15),
+                      height: 150,
+                      width: 180,
+                      decoration: BoxDecoration(
+                      color: Color.fromRGBO(202, 225, 255, 1),
+                        borderRadius: BorderRadius.circular(20)
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: Text("Today's Task Complete",style: TextStyle(color: Color.fromRGBO(13, 71, 161, 1),fontFamily: "Mont-SemiBold", fontSize: 11),))
+                            ],
+                          ),
+                          Row(
+                            children: [
 
-                //             ],
-                //           )
-                //         ],
-                //       ),
-                //     ),
-                //     Container(
-                //       margin: EdgeInsets.only(left: 20),
-                //       height: 150,
-                //       width: 180,
-                //       decoration: BoxDecoration(
-                //       color: Color.fromRGBO(243, 229, 245, 1),
-                //         borderRadius: BorderRadius.circular(20)
-                //       ),
-                //       child: Column(
-                //         children: [
-                //           Row(
-                //             mainAxisAlignment: MainAxisAlignment.center,
-                //             children: [
-                //               Container(
-                //                 margin: EdgeInsets.only(top: 10),
-                //                 child: Text("Total Task Complete",style: TextStyle(color: Color.fromRGBO(74, 20, 140, 1),fontFamily: "Mont-SemiBold", fontSize: 12),))
-                //             ],
-                //           ),
-                //           Row(
-                //             children: [
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 20),
+                      height: 150,
+                      width: 180,
+                      decoration: BoxDecoration(
+                      color: Color.fromRGBO(243, 229, 245, 1),
+                        borderRadius: BorderRadius.circular(20)
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: Text("Total Task Complete",style: TextStyle(color: Color.fromRGBO(74, 20, 140, 1),fontFamily: "Mont-SemiBold", fontSize: 12),))
+                            ],
+                          ),
+                          Row(
+                            children: [
 
-                //             ],
-                //           )
-                //         ],
-                //       ),
-                //     ),
-                //   ],
-                // )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                )
               ],
               
             ),

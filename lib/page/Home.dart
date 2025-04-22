@@ -481,11 +481,27 @@ String iconName = iconOptions.entries
               Row(
                 children: [
                   SizedBox(width: 20),
-                  Text("Task", style: TextStyle(color: Colors.black, fontFamily: "Mont-SemiBold", fontSize: 17))
+                  Text("Today Task", style: TextStyle(color: Colors.black, fontFamily: "Mont-SemiBold", fontSize: 17))
                 ],
               ),
               SizedBox(height: 10),
-              TaskWidget(futuretasks: futureTasks,)
+              Container(
+                width: 360,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 105, 105, 105)
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+
+                      ],
+                    )
+                  ],
+                ),
+              )
+              // TaskWidget(futuretasks: futureTasks,)
             ],
           ),
         ),

@@ -14,16 +14,19 @@ class BoardCard extends StatelessWidget {
   }) : super(key: key);
 
   bool isDueToday(DateTime date) {
-  final now = DateTime.now();
-  return date.year == now.year && date.month == now.month && date.day == now.day;
-}
-
+    final now = DateTime.now();
+    return date.year == now.year && date.month == now.month && date.day == now.day;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bool isDone = board.statusId == 3;
+    // Tampilkan doneDate jika selesai, else tampilkan dueDate
+    final DateTime? dateToShow = isDone ? board.doneDate : board.dueDate;
+
     return Card(
       elevation: 2,
-      margin: EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
@@ -43,20 +46,28 @@ class BoardCard extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
+                  fontFamily: "Mont-SemiBold",
                 ),
               ),
-              if (board.dueDate != null)
-  Padding(
-    padding: const EdgeInsets.only(top: 4),
-    child: Text(
-      'Due: ${board.dueDate!.day}-${board.dueDate!.month}-${board.dueDate!.year}',
-      style: TextStyle(
-        fontSize: 12,
-        color: isDueToday(board.dueDate!) ? Colors.red : Colors.grey[700],
-      ),
-    ),
-  ),
-
+              // Jika ada due date atau done date
+              if (dateToShow != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    isDone
+                        ? 'Completed: ${dateToShow.day}-${dateToShow.month}-${dateToShow.year}'
+                        : 'Due: ${dateToShow.day}-${dateToShow.month}-${dateToShow.year}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDone
+                          ? Colors.green // Tampilkan hijau jika selesai
+                          : isDueToday(dateToShow)
+                              ? const Color.fromARGB(255, 226, 24, 10) // Merah jika due today
+                              : Colors.grey[700], // Abu-abu jika belum jatuh tempo
+                      fontFamily: "Mont-SemiBold",
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
