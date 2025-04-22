@@ -572,14 +572,17 @@ final int statusId = selectedStatusObject.id ?? 1;
 
 @override
 Widget build(BuildContext context) {
+      print('Task: ${widget.task.name}, Priority: ${widget.task.priority}');  // Debug output
+
   return Scaffold(
+    
     backgroundColor: Colors.white,
     body: Stack(
       children: [
         Column(
           children: [
             TaskHeader(
-              taskName: widget.task.name,
+              name: widget.task.name,
               priority: widget.task.priority,
               onAdd: showOptionDialog,
               onBack: () => Navigator.pop(context),

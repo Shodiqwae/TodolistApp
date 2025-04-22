@@ -2,6 +2,7 @@ import 'package:bottom_bar_matu/bottom_bar/bottom_bar_bubble.dart';
 import 'package:bottom_bar_matu/bottom_bar_item.dart';
 import 'package:flutter/material.dart';
 import 'package:todolist_app/model/category.dart';
+import 'package:todolist_app/model/model_board.dart';
 import 'package:todolist_app/model/taskmodel.dart';
 import 'package:todolist_app/page/Task.dart';
 import 'package:todolist_app/page/TaskFormCreate.dart';
@@ -12,6 +13,8 @@ import 'package:todolist_app/widget/HomePage/HomeAppBar.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:todolist_app/widget/HomePage/TodayTaskWidget.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -31,6 +34,8 @@ class _HomePageState extends State<HomePage> {
   // Nilai default untuk kategori baru
   IconData selectedIcon = Icons.label;
   Color selectedColor = Colors.blue;
+    late Future<List<Board>> _todayTasks;
+
   final TextEditingController categoryNameController = TextEditingController();
 
   
@@ -59,7 +64,7 @@ class _HomePageState extends State<HomePage> {
     _loadCategories();
     futureTasks = fetchTasks();
         loadTasks();
-
+    _todayTasks = getTodayTasks();  
   }
   void loadTasks() {
     setState(() {
@@ -381,6 +386,18 @@ String iconName = iconOptions.entries
       futureTasks = fetchTasks(); // Memanggil ulang fetchTasks untuk mendapatkan data terbaru
     });
   }
+
+  Future<List<Board>> getTodayTasks() async {
+    final String baseUrl = 'http://10.0.2.2:8000'; // Ganti dengan URL API kamu
+    final response = await http.get(Uri.parse('$baseUrl/api/today-tasks'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((boardJson) => Board.fromJson(boardJson)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -478,29 +495,22 @@ String iconName = iconOptions.entries
                   ),
                   
               SizedBox(height: 20),
-              Row(
+              Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(width: 20),
-                  Text("Today Task", style: TextStyle(color: Colors.black, fontFamily: "Mont-SemiBold", fontSize: 17))
+                  Row(
+                    children: [
+                      SizedBox(width: 20),
+                      Container(
+                        margin: EdgeInsets.all(0),
+                        child: Text("Today Task", style: TextStyle(color: Colors.black, fontFamily: "Mont-SemiBold", fontSize: 17)))
+                    ],
+                  ),
+                  TodayTaskList(future:  _todayTasks)
                 ],
               ),
-              SizedBox(height: 10),
-              Container(
-                width: 360,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 105, 105, 105)
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
 
-                      ],
-                    )
-                  ],
-                ),
-              )
               // TaskWidget(futuretasks: futureTasks,)
             ],
           ),

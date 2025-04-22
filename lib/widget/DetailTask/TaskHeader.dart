@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TaskHeader extends StatelessWidget {
-  final String taskName;
+  final String name;
   final String priority;
   final VoidCallback onAdd;
   final VoidCallback onBack;
@@ -9,7 +9,7 @@ class TaskHeader extends StatelessWidget {
 
   const TaskHeader({
     Key? key,
-    required this.taskName,
+    required this.name,
     required this.priority,
     required this.onAdd,
     required this.onBack,
@@ -40,7 +40,7 @@ class TaskHeader extends StatelessWidget {
               Container(
                 width: 250,
                 child: Text(
-                  taskName,
+                  name,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Colors.white,

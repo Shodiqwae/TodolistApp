@@ -84,12 +84,8 @@ class _TaskWidgetState extends State<TaskWidget> {
                 final task = currentTasks[index];
                 return GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailTask(task: task),
-                      ),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => DetailTask(task: task)));
+
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
