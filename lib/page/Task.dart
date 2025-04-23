@@ -18,6 +18,8 @@ class TaskPage extends StatefulWidget {
 }
 
 class _TaskState extends State<TaskPage> {
+    TextEditingController _searchController = TextEditingController(); // Menambahkan controller untuk pencarian
+  List<Task> filteredTasks = [];
     late String _token;
      late Future<List<Task>> futureTasks;
 
@@ -28,7 +30,15 @@ class _TaskState extends State<TaskPage> {
     futureTasks = fetchTasks();
     loadTasks();
     // _token = widget.token;
-   
+
+  }
+
+  void _searchTasks(String query) {
+    setState(() {
+      futureTasks = fetchTasks().then((tasks) => tasks
+          .where((task) => task.name.toLowerCase().contains(query.toLowerCase()))
+          .toList());
+    });
   }
 
   void loadTasks() {
@@ -75,47 +85,57 @@ class _TaskState extends State<TaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(235, 235, 235, 1),
-      body: Column(
-        children: [
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [Color.fromRGBO(19, 86, 148, 1), Color.fromRGBO(0, 102, 204, 1)])
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(height: 30,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(left: 20),
-                          child: Text("MyTask", style: TextStyle(color: Colors.white, fontSize: 23,fontFamily: "Mont-Bold"),)),
-                        Container(
-                          margin: EdgeInsets.only(right: 20),
-                          child: IconButton(onPressed: () {}, icon: Icon(Icons.sort,size: 35,color: Colors.white,)))
-                      ],
-                    ),
-                                        SizedBox(height: 5,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 380,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14)
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+                Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Color.fromRGBO(19, 86, 148, 1), Color.fromRGBO(0, 102, 204, 1)])
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 30,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(left: 20),
+                            child: Text("MyTask", style: TextStyle(color: Colors.white, fontSize: 23,fontFamily: "Mont-Bold"),)),
+                          Container(
+                            margin: EdgeInsets.only(right: 20),
+                            child: IconButton(onPressed: () {}, icon: Icon(Icons.sort,size: 35,color: Colors.white,)))
+                        ],
+                      ),
+                                          SizedBox(height: 5,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                        width: 380,
+                        height: 45,
+                        decoration: BoxDecoration(
+                            color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                        child: TextFormField(
+                          controller: _searchController,
+                          style: TextStyle(color: Colors.black),
+                          decoration: InputDecoration(
+                            hintText: 'Search task...',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
                           ),
-                        )
-                      ],
-                    ),
-                  ],
+                          onChanged: _searchTasks,
+                        ),
+                      ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-                          TaskWidget(futuretasks: futureTasks,)
-
-        ],
+                            TaskWidget(futuretasks: futureTasks,)
+        
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -143,10 +163,10 @@ class _TaskState extends State<TaskPage> {
             iconData: Icons.history,
             // label: 'Notification',
           ),
-          BottomBarItem(
-            iconData: Icons.calendar_month,
-            // label: 'Calendar',
-          ),
+          // BottomBarItem(
+          //   iconData: Icons.calendar_month,
+          //   // label: 'Calendar',
+          // ),
         ],
          onSelect: _onNavTap,
         selectedIndex: _currentIndex,

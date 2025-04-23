@@ -231,7 +231,10 @@ Future<void> deleteTask(int taskId) async {
                                       ),
                                       Container(
                                         margin: EdgeInsets.only(right: 10),
-                                        child: IconButton(onPressed: () {}, icon: Icon(Icons.delete_forever,size: 30,color: Colors.red,)))
+                                        child: IconButton(onPressed: () {
+                                          _showDeleteConfirmationDialog(() {
+                                  deleteTask(int.parse(board.id.toString()));});
+                                        }, icon: Icon(Icons.delete_forever,size: 30,color: Colors.red,)))
                                   // IconButton(
                                   //   icon: Icon(Icons.delete),
                                   //   onPressed: () {
@@ -269,9 +272,9 @@ Future<void> deleteTask(int taskId) async {
           BottomBarItem(
             iconData: Icons.history,
           ),
-          BottomBarItem(
-            iconData: Icons.calendar_month,
-          ),
+          // BottomBarItem(
+          //   iconData: Icons.calendar_month,
+          // ),
         ],
         onSelect: _onNavTap,
         selectedIndex: _currentIndex,

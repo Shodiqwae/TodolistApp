@@ -151,98 +151,108 @@ String iconName = iconOptions.entries
   }
 
   // Method untuk menampilkan dialog pembuatan kategori
-  void _showAddCategoryDialog() {
-    // Reset nilai input setiap kali dialog dibuka
-    setState(() {
-      selectedIcon = Icons.label;
-      selectedColor = Colors.blue;
-      categoryNameController.clear();
-    });
-    
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text('Tambah Kategori'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: categoryNameController,
-                      decoration: InputDecoration(
-                        labelText: 'Nama Kategori',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Icon:'),
-                        InkWell(
-                          onTap: () {
-                            // Pilih icon dalam dialog yang sama tanpa menutup dialog utama
-                            _selectIcon(context, setDialogState);
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(selectedIcon, size: 30),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Warna:'),
-                        InkWell(
-                          onTap: () {
-                            // Pilih warna dalam dialog yang sama tanpa menutup dialog utama
-                            _selectColor(context, setDialogState);
-                          },
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: selectedColor,
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+  void showAddCategoryDialog() {
+  String categoryName = '';
+  String selectedIcon = 'label';
+  Color selectedColor = Colors.blue;
+
+  final iconChoices = {
+    'work': Icons.work,
+    'person': Icons.person,
+    'flight': Icons.flight,
+    'computer': Icons.computer,
+    'home': Icons.home,
+    'shopping_cart': Icons.shopping_cart,
+    'health_and_safety': Icons.health_and_safety,
+    'school': Icons.school,
+    'attach_money': Icons.attach_money,
+    'people': Icons.people,
+    'movie': Icons.movie,
+    'restaurant': Icons.restaurant,
+    'label': Icons.label,
+  };
+  
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Tambah Kategori'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: InputDecoration(labelText: 'Nama Kategori'),
+                onChanged: (value) {
+                  categoryName = value;
+                },
               ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('Batal'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: Text('Simpan'),
-                  onPressed: () {
-                    _createCategory();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+              DropdownButtonFormField<String>(
+                value: selectedIcon,
+                decoration: InputDecoration(labelText: 'Pilih Icon'),
+                items: iconChoices.keys.map((iconName) {
+                  return DropdownMenuItem<String>(
+                    value: iconName,
+                    child: Row(
+                      children: [
+                        Icon(iconChoices[iconName]),
+                        SizedBox(width: 10),
+                        Text(iconName),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedIcon = value!;
+                  });
+                },
+              ),
+              SizedBox(height: 10),
+              Text('Pilih Warna'),
+              BlockPicker(
+                pickerColor: selectedColor,
+                onColorChanged: (color) {
+                  selectedColor = color;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: Text('Batal')),
+          ElevatedButton(
+            onPressed: () async {
+              if (categoryName.isEmpty) return;
+
+              final body = {
+                'name': categoryName,
+                'user_id': '6', // ganti sesuai user_id yang aktif
+                'icon': selectedIcon,
+                'color': '#${selectedColor.value.toRadixString(16).substring(2)}',
+              };
+
+              final response = await http.post(
+                Uri.parse('http://10.0.2.2:8000/api/categories'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(body),
+              );
+
+              if (response.statusCode == 200 || response.statusCode == 201) {
+                Navigator.pop(context);
+              } else {
+                print('Gagal simpan kategori');
+              }
+            },
+            child: Text('Simpan'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   // Method untuk memilih icon dengan pendekatan yang lebih baik
   void _selectIcon(BuildContext context, StateSetter setDialogState) {
@@ -463,7 +473,7 @@ String iconName = iconOptions.entries
                               Tooltip(
                                 message: "Tambah Kategori",
                                 child: InkWell(
-                                  onTap: _showAddCategoryDialog,
+                                  onTap: showAddCategoryDialog,
                                   child: Container(
                                     width: 55,
                                     height: 55,
@@ -529,25 +539,15 @@ String iconName = iconOptions.entries
             iconData: Icons.history,
             // label: 'Notification',
           ),
-          BottomBarItem(
-            iconData: Icons.calendar_month,
-            // label: 'Calendar',
-          ),
+          // BottomBarItem(
+          //   iconData: Icons.calendar_month,
+          //   // label: 'Calendar',
+          // ),
         ],
          onSelect: _onNavTap,
         selectedIndex: _currentIndex,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Menampilkan form untuk membuat task
-          showDialog(
-            context: context,
-            builder: (context) => TaskFormDialog(onTaskCreated: loadTasks,),
-          );
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
-      ),
+   
   
     );
   }

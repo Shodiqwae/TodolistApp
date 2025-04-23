@@ -1,12 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
-class HomeAppbar extends StatelessWidget {
+
+class HomeAppbar extends StatefulWidget {
   const HomeAppbar({super.key});
+
+  @override
+  State<HomeAppbar> createState() => _HomeAppbarState();
+}
+
+class _HomeAppbarState extends State<HomeAppbar> {
+  String today = DateFormat('EEEE').format(DateTime.now()); // e.g., Monday
+String fullDate = DateFormat('d MMMM y').format(DateTime.now()); // e.g., 21 April 2025
+  double completionPercent = 0.0;
+  double todayPercent = 0.0;
+
+
+Future<void> fetchCompletionPercent() async {
+  final response = await http.get(Uri.parse("http://10.0.2.2:8000/api/board-completion-percentage"));
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    setState(() {
+      completionPercent = (data['percentage'] / 100).clamp(0.0, 1.0);
+    });
+  } else {
+    throw Exception('Failed to load percent data');
+  }
+}
+Future<void> fetchTodayTaskPercent() async {
+  final response = await http.get(Uri.parse("http://10.0.2.2:8000/api/today-task-completion"));
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    setState(() {
+      todayPercent = (data['percentage'] / 100).clamp(0.0, 1.0);
+    });
+  } else {
+    throw Exception('Failed to load today task percent');
+  }
+}
+
+
+
+@override
+void initState() {
+  super.initState();
+  fetchCompletionPercent();
+    fetchTodayTaskPercent();
+
+}
 
   @override
   Widget build(BuildContext context) {
     return  Container(
-            height: 280,
+            height: 290,
             decoration: BoxDecoration(
                gradient: SweepGradient(
       center: Alignment.center,
@@ -31,8 +82,22 @@ class HomeAppbar extends StatelessWidget {
                           SizedBox(height: 30,),
                         Text.rich(
                           TextSpan(children: [
-                         TextSpan(text:"Monday\n", style: TextStyle(fontFamily: "Mont-Bold", fontSize: 14, color: Colors.white),),
-                      TextSpan(text: "21 April 2025", style: TextStyle(fontFamily: "Mont-Bold", fontSize: 12, color: Colors.white)),
+                          TextSpan(
+              text: "$today\n",
+              style: TextStyle(
+                fontFamily: "Mont-Bold",
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+            TextSpan(
+              text: fullDate,
+              style: TextStyle(
+                fontFamily: "Mont-Bold",
+                fontSize: 12,
+                color: Colors.white,
+              ),
+            ),
                       
                           ])
                         )
@@ -63,7 +128,7 @@ class HomeAppbar extends StatelessWidget {
                   children: [
                     Container(
                       margin: EdgeInsets.only(left: 15),
-                      height: 150,
+                      height: 165,
                       width: 180,
                       decoration: BoxDecoration(
                       color: Color.fromRGBO(202, 225, 255, 1),
@@ -76,11 +141,31 @@ class HomeAppbar extends StatelessWidget {
                             children: [
                               Container(
                                 margin: EdgeInsets.only(top: 10),
-                                child: Text("Today's Task Complete",style: TextStyle(color: Color.fromRGBO(13, 71, 161, 1),fontFamily: "Mont-SemiBold", fontSize: 11),))
+                                child: Text("Today's Task Complete",style: TextStyle(color: Color.fromRGBO(13, 71, 161, 1),fontFamily: "Mont-SemiBold", fontSize: 12),))
                             ],
                           ),
+                          SizedBox(height: 15,),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+  Container(
+  child: CircularPercentIndicator(
+  radius: 54.0,
+  lineWidth: 10.0,
+  percent: todayPercent,
+  center: Text(
+    "${(todayPercent * 100).toStringAsFixed(0)}%",
+    style: TextStyle(
+      fontFamily: "Mont-SemiBold",
+      color: Color.fromRGBO(13, 71, 161, 1),
+    ),
+  ),
+  progressColor: Color.fromRGBO(13, 71, 161, 1),
+  backgroundColor: Colors.grey.shade300,
+  circularStrokeCap: CircularStrokeCap.round,
+),
+
+)
 
                             ],
                           )
@@ -89,7 +174,7 @@ class HomeAppbar extends StatelessWidget {
                     ),
                     Container(
                       margin: EdgeInsets.only(left: 20),
-                      height: 150,
+                      height: 165,
                       width: 180,
                       decoration: BoxDecoration(
                       color: Color.fromRGBO(243, 229, 245, 1),
@@ -105,9 +190,23 @@ class HomeAppbar extends StatelessWidget {
                                 child: Text("Total Task Complete",style: TextStyle(color: Color.fromRGBO(74, 20, 140, 1),fontFamily: "Mont-SemiBold", fontSize: 12),))
                             ],
                           ),
+                                                    SizedBox(height: 15,),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                                Container(
+  child: CircularPercentIndicator(
+  radius: 54.0,
+  lineWidth: 10.0,
+  percent: completionPercent,
+  center: Text("${(completionPercent * 100).toStringAsFixed(0)}%",
+      style: TextStyle(fontFamily: "Mont-SemiBold", color: Color.fromRGBO(74, 20, 140, 1))),
+  progressColor: Color.fromRGBO(74, 20, 140, 1),
+  backgroundColor: Colors.grey.shade300,
+  circularStrokeCap: CircularStrokeCap.round,
+),
 
+)
                             ],
                           )
                         ],

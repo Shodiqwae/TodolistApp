@@ -109,7 +109,7 @@ final currentStatus = statusList.firstWhere(
   String getDisplayLabel(String statusName) {
     switch (statusName) {
       case 'pending':
-        return 'Pending';
+        return 'Not Started';
       case 'in_progress':
         return 'In Progress';
       case 'done':

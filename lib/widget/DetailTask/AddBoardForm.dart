@@ -90,7 +90,7 @@ class _AddBoardFormState extends State<AddBoardForm> {
   String getDisplayLabel(String statusName) {
     switch (statusName) {
       case 'pending':
-        return 'Pending';
+        return 'not Started';
       case 'in_progress':
         return 'In Progress';
       case 'done':
