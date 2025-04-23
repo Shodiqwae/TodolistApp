@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:todolist_app/page/CategoryPage.dart';
 import 'package:todolist_app/page/DetailTask.dart';
+import 'package:todolist_app/page/HistoryPage.dart';
 import 'package:todolist_app/page/Home.dart';
 import 'package:todolist_app/page/Task.dart';
 import 'package:todolist_app/page/login.dart';

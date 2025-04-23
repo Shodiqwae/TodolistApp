@@ -7,6 +7,8 @@ class Board {
   final int? tasksId;
   final DateTime? dueDate;
   final DateTime? doneDate; // ✅ Tambahkan ini
+  final String? taskName;
+  
 
   Board({
     this.id,
@@ -17,6 +19,7 @@ class Board {
     this.tasksId,
     this.dueDate,
     this.doneDate, // ✅
+    this.taskName,
   });
 
   factory Board.fromJson(Map<String, dynamic> json) {
@@ -29,6 +32,7 @@ class Board {
       tasksId: json['tasks_id'],
       dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
       doneDate: json['done_date'] != null ? DateTime.parse(json['done_date']) : null, // ✅
+      taskName: json['task']?['name'],
     );
   }
 

@@ -8,8 +8,17 @@ class HomeAppbar extends StatelessWidget {
     return  Container(
             height: 280,
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [Color.fromRGBO(19, 86, 148, 1), Color.fromRGBO(0, 102, 204, 1)])
-            ),
+               gradient: SweepGradient(
+      center: Alignment.center,
+      startAngle: 0.0,
+      endAngle: 3.15 * 2, // 360 derajat
+      stops: [0.55, 0.50],
+      colors: [
+        Color(0xFF0118D8), // warna kedua
+        Color(0xFF1B56FD), // warna pertama
+      ],
+    ),
+    ),
             child: Column(
               children: [
                 Row(

@@ -25,6 +25,7 @@ class _TodayTaskListState extends State<TodayTaskList> {
   }
 }
 
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Board>>(
@@ -95,8 +96,8 @@ class _TodayTaskListState extends State<TodayTaskList> {
                                   margin: const EdgeInsets.only(right: 20),
                                   child: Text(
                                     board.statusId == 1 ? 'Pending' : 'In Progress',
-                                    style: const TextStyle(
-                                      color: Color.fromARGB(255, 178, 172, 11),
+                                    style: TextStyle(
+                                      color: board.statusId == 1 ? Colors.orange : Colors.blue,
                                       fontSize: 16,
                                       fontFamily: "Mont-SemiBold",
                                     ),

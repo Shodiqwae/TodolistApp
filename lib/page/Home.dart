@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:todolist_app/model/category.dart';
 import 'package:todolist_app/model/model_board.dart';
 import 'package:todolist_app/model/taskmodel.dart';
+import 'package:todolist_app/page/CategoryPage.dart';
+import 'package:todolist_app/page/HistoryPage.dart';
 import 'package:todolist_app/page/Task.dart';
 import 'package:todolist_app/page/TaskFormCreate.dart';
 import 'package:todolist_app/page/TaskWidget.dart';
@@ -361,29 +363,20 @@ String iconName = iconOptions.entries
           );
         });
         break;
+      case 2:
+      Future.delayed(Duration(milliseconds: 750), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Historypage()),
+          );
+        });
+      break;
     }
   }
-  Future<void> _refreshHomePage() async {
-  // Logika untuk memperbarui data
-  try {
-    // Misalnya, memuat data dari server
-    await Future.delayed(Duration(seconds: 2)); // Simulasi delay
-    // Update data di sini
+ 
+  Future<void> _refreshTodayTasks() async {
     setState(() {
-      // Perbarui state jika diperlukan
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Halaman berhasil disegarkan')),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Gagal menyegarkan halaman: $e')),
-    );
-  }
-}
-  Future<void> _refreshTasks() async {
-    setState(() {
-      futureTasks = fetchTasks(); // Memanggil ulang fetchTasks untuk mendapatkan data terbaru
+     _todayTasks= getTodayTasks(); // Memanggil ulang fetchTasks untuk mendapatkan data terbaru
     });
   }
 
@@ -404,7 +397,7 @@ String iconName = iconOptions.entries
     return Scaffold(
       backgroundColor: Color.fromRGBO(235, 235, 235, 1),
       body: RefreshIndicator(
-         onRefresh: _refreshTasks,
+         onRefresh: _refreshTodayTasks,
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -418,10 +411,15 @@ String iconName = iconOptions.entries
                     margin: EdgeInsets.only(left: 20),
                     child: Text('Category', style: TextStyle(fontFamily: "Mont-SemiBold", color: Colors.black, fontSize: 17)),
                   ),
-                  // Container(
-                  //   margin: EdgeInsets.only(right: 33),
-                  //   child: Text('See All', style: TextStyle(fontFamily: "Mont-SemiBold", color: Color.fromRGBO(97, 119, 140, 1), fontSize: 17)),
-                  // ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder:(context) => CategoryPage()));
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(right: 33),
+                      child: Text('See All', style: TextStyle(fontFamily: "Mont-SemiBold", color: Color.fromRGBO(97, 119, 140, 1), fontSize: 17)),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 10),
@@ -528,7 +526,7 @@ String iconName = iconOptions.entries
             // label: 'Chat',
           ),
           BottomBarItem(
-            iconData: Icons.calendar_month,
+            iconData: Icons.history,
             // label: 'Notification',
           ),
           BottomBarItem(

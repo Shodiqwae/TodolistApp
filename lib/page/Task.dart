@@ -2,6 +2,7 @@ import 'package:bottom_bar_matu/bottom_bar/bottom_bar_bubble.dart';
 import 'package:bottom_bar_matu/bottom_bar_item.dart';
 import 'package:flutter/material.dart';
 import 'package:todolist_app/model/taskmodel.dart';
+import 'package:todolist_app/page/HistoryPage.dart';
 import 'package:todolist_app/page/Home.dart';
 import 'package:todolist_app/page/TaskFormCreate.dart';
 import 'package:todolist_app/page/TaskWidget.dart';
@@ -57,6 +58,16 @@ class _TaskState extends State<TaskPage> {
 
         break;
       case 1:
+        break;
+        case 2:
+          Future.delayed(Duration(milliseconds: 750), () {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Historypage(
+      // token: _token,
+      )),
+  );
+});     
         break;
     }
   }
@@ -129,7 +140,7 @@ class _TaskState extends State<TaskPage> {
             // label: 'Chat',
           ),
           BottomBarItem(
-            iconData: Icons.calendar_month,
+            iconData: Icons.history,
             // label: 'Notification',
           ),
           BottomBarItem(
