@@ -3,42 +3,64 @@ import 'package:http/http.dart' as http;
 import 'package:todolist_app/model/category.dart';
 
 class CategoryService {
-  // Ganti dengan URL API Laravel Anda
   final String baseUrl = 'http://10.0.2.2:8000/api';
   
-  // Method untuk mengambil semua kategori
-  Future<List<Category>> getCategories() async {
-    final response = await http.get(Uri.parse('$baseUrl/categories'));
-    
+  // Method untuk mengambil kategori berdasarkan user yang login
+Future<List<Category>> getCategories(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/categories'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
     if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body);
-      List<Category> categories = body.map((item) => Category.fromJson(item)).toList();
-      return categories;
+      List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Category.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load categories');
+      // Print the error response for debugging
+      print('Failed to load categories: ${response.body}');
+      throw Exception('Failed to load categories: ${response.statusCode}');
     }
   }
   
-  // Method untuk membuat kategori baru
-  Future<Category> createCategory(String name, int userId, String? icon, String? color) async {
+  // Method to create a new category
+ Future<Category> createCategory(
+    String name, 
+    String token, 
+    String icon, 
+    String color
+  ) async {
+    // Debug info
+    print('Creating category with token: $token');
+    print('Category data: name=$name, icon=$icon, color=$color');
+    
     final response = await http.post(
       Uri.parse('$baseUrl/categories'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json', // Add this line
+      },
       body: jsonEncode({
         'name': name,
-        'user_id': userId,
         'icon': icon,
         'color': color,
       }),
     );
-    
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      return Category.fromJson(data['data']);
+
+    // Debug response
+    print('createCategory response code: ${response.statusCode}');
+    print('createCategory response body: ${response.body}');
+
+    if (response.statusCode == 201) {
+      return Category.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to create category');
+      throw Exception('Failed to create category: ${response.body}');
     }
   }
+
   
   // Method untuk mendapatkan detail kategori
   Future<Category> getCategoryDetail(int id) async {

@@ -41,7 +41,7 @@ final TextEditingController passwordController = TextEditingController();
         MaterialPageRoute(builder: (context) => 
         // ProfileScreen(token: response['data']['token'])
         HomePage(
-          // token: response['data']['token'], 
+          token: response['data']['token'], 
           )
         ),
       );

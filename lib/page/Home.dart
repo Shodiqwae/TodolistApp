@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:todolist_app/model/category.dart';
 import 'package:todolist_app/model/model_board.dart';
 import 'package:todolist_app/model/taskmodel.dart';
+import 'package:todolist_app/page/CalenderPage.dart';
 import 'package:todolist_app/page/CategoryPage.dart';
 import 'package:todolist_app/page/HistoryPage.dart';
 import 'package:todolist_app/page/Task.dart';
@@ -11,6 +12,7 @@ import 'package:todolist_app/page/TaskFormCreate.dart';
 import 'package:todolist_app/page/TaskWidget.dart';
 import 'package:todolist_app/service/categoryservice.dart';
 import 'package:todolist_app/service/tasksservice.dart';
+import 'package:todolist_app/widget/HomePage/CategoryWidget.dart';
 import 'package:todolist_app/widget/HomePage/HomeAppBar.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:http/http.dart' as http;
@@ -19,65 +21,54 @@ import 'dart:convert';
 import 'package:todolist_app/widget/HomePage/TodayTaskWidget.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  final String token;
+
+  HomePage({super.key, required this.token});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  late String _token;
+
   late Future<List<Task>> futureTasks;
-  
+
   final CategoryService _categoryService = CategoryService();
   List<Category> categories = [];
   bool isLoading = true;
   int _currentIndex = 0;
-  
+  bool _isInitialized = false;
+
   // Nilai default untuk kategori baru
   IconData selectedIcon = Icons.label;
   Color selectedColor = Colors.blue;
-    late Future<List<Board>> _todayTasks;
+  late Future<List<Board>> _todayTasks;
 
   final TextEditingController categoryNameController = TextEditingController();
 
-  
-
-
   // Map icon untuk pilihan icon di dialog
-  final Map<String, IconData> iconOptions = {
-'work': Icons.work,
-    'person': Icons.person,
-    'flight': Icons.flight,
-    'computer': Icons.computer,
-    'home': Icons.home,
-    'shopping_cart': Icons.shopping_cart,
-    'health_and_safety': Icons.health_and_safety,
-    'school': Icons.school,
-    'attach_money': Icons.attach_money,
-    'people': Icons.people,
-    'movie': Icons.movie,
-    'restaurant': Icons.restaurant,
-    'label': Icons.label, 
-  };
 
   @override
   void initState() {
     super.initState();
+    _token = widget.token; // <-- pindahkan ini ke atas dulu
     _loadCategories();
     futureTasks = fetchTasks();
-        loadTasks();
-    _todayTasks = getTodayTasks();  
+    loadTasks();
+    _todayTasks = getTodayTasks();
   }
+
   void loadTasks() {
     setState(() {
       futureTasks = fetchTasks(); // fungsi dari TaskService atau semacamnya
     });
   }
+
   @override
   void dispose() {
     categoryNameController.dispose();
     super.dispose();
-    
   }
 
   Future<void> _loadCategories() async {
@@ -85,273 +76,32 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         isLoading = true;
       });
-      final fetchedCategories = await _categoryService.getCategories();
+      print('Fetching categories with token: $_token');
+      final fetchedCategories = await _categoryService.getCategories(_token);
+      print('Received categories: ${fetchedCategories.length}');
+      // Print first category details if available
+      if (fetchedCategories.isNotEmpty) {
+        print(
+            'First category: ${fetchedCategories[0].name}, User ID: ${fetchedCategories[0].userId}');
+      }
+
       setState(() {
         categories = fetchedCategories;
         isLoading = false;
       });
     } catch (e) {
+      print('Error loading categories: $e');
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat kategori: $e'))
-      );
-    }
-  }
 
-  // Method untuk membuat kategori baru
-  Future<void> _createCategory() async {
-    if (categoryNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Nama kategori tidak boleh kosong'))
-      );
-      return;
+      if (_isInitialized && context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Gagal memuat kategori: $e')));
+      }
     }
 
-    try {
-      // Konversi warna ke format string hex
-      String colorHex = '#${selectedColor.value.toRadixString(16).substring(2)}';
-      
-      // Konversi icon ke nama string
-String iconName = iconOptions.entries
-    .firstWhere((entry) => entry.value == selectedIcon, 
-               orElse: () => MapEntry('label', Icons.label))
-    .key.toLowerCase();
-      
-      // Gunakan ID user dari user yang sedang login
-      int userId = 6; // Ganti dengan ID user yang sebenarnya
-      
-      await _categoryService.createCategory(
-        categoryNameController.text, 
-        userId, 
-        iconName, 
-        colorHex
-      );
-      
-      // Refresh daftar kategori
-      await _loadCategories();
-      
-      // Reset nilai input
-      categoryNameController.clear();
-      selectedIcon = Icons.label;
-      selectedColor = Colors.blue;
-      
-      // Tutup dialog
-      Navigator.of(context).pop();
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kategori berhasil dibuat'))
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal membuat kategori: $e'))
-      );
-    }
-  }
-
-  // Method untuk menampilkan dialog pembuatan kategori
-  void showAddCategoryDialog() {
-  String categoryName = '';
-  String selectedIcon = 'label';
-  Color selectedColor = Colors.blue;
-
-  final iconChoices = {
-    'work': Icons.work,
-    'person': Icons.person,
-    'flight': Icons.flight,
-    'computer': Icons.computer,
-    'home': Icons.home,
-    'shopping_cart': Icons.shopping_cart,
-    'health_and_safety': Icons.health_and_safety,
-    'school': Icons.school,
-    'attach_money': Icons.attach_money,
-    'people': Icons.people,
-    'movie': Icons.movie,
-    'restaurant': Icons.restaurant,
-    'label': Icons.label,
-  };
-  
-
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Tambah Kategori'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: InputDecoration(labelText: 'Nama Kategori'),
-                onChanged: (value) {
-                  categoryName = value;
-                },
-              ),
-              DropdownButtonFormField<String>(
-                value: selectedIcon,
-                decoration: InputDecoration(labelText: 'Pilih Icon'),
-                items: iconChoices.keys.map((iconName) {
-                  return DropdownMenuItem<String>(
-                    value: iconName,
-                    child: Row(
-                      children: [
-                        Icon(iconChoices[iconName]),
-                        SizedBox(width: 10),
-                        Text(iconName),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedIcon = value!;
-                  });
-                },
-              ),
-              SizedBox(height: 10),
-              Text('Pilih Warna'),
-              BlockPicker(
-                pickerColor: selectedColor,
-                onColorChanged: (color) {
-                  selectedColor = color;
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context), child: Text('Batal')),
-          ElevatedButton(
-            onPressed: () async {
-              if (categoryName.isEmpty) return;
-
-              final body = {
-                'name': categoryName,
-                'user_id': '6', // ganti sesuai user_id yang aktif
-                'icon': selectedIcon,
-                'color': '#${selectedColor.value.toRadixString(16).substring(2)}',
-              };
-
-              final response = await http.post(
-                Uri.parse('http://10.0.2.2:8000/api/categories'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode(body),
-              );
-
-              if (response.statusCode == 200 || response.statusCode == 201) {
-                Navigator.pop(context);
-              } else {
-                print('Gagal simpan kategori');
-              }
-            },
-            child: Text('Simpan'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-  // Method untuk memilih icon dengan pendekatan yang lebih baik
-  void _selectIcon(BuildContext context, StateSetter setDialogState) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Pilih Icon'),
-          content: Container(
-            width: double.maxFinite,
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: iconOptions.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-              ),
-              itemBuilder: (context, index) {
-                String key = iconOptions.keys.elementAt(index);
-                IconData iconData = iconOptions[key]!;
-                return InkWell(
-                  onTap: () {
-                    // Update icon yang dipilih menggunakan StateSetter
-                    setDialogState(() {
-                      selectedIcon = iconData;
-                    });
-                    // Update juga state utama
-                    setState(() {
-                      selectedIcon = iconData;
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(iconData, size: 30),
-                      SizedBox(height: 5),
-                      Text(key, style: TextStyle(fontSize: 10), overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // Method untuk memilih warna dengan pendekatan yang lebih baik
-  void _selectColor(BuildContext context, StateSetter setDialogState) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        Color pickerColor = selectedColor;
-        return AlertDialog(
-          title: Text('Pilih Warna'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (Color color) {
-                pickerColor = color;
-              },
-              pickerAreaHeightPercent: 0.8,
-              displayThumbColor: true,
-              enableAlpha: false,
-              paletteType: PaletteType.hsv,
-              pickerAreaBorderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(2),
-                topRight: Radius.circular(2),
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Pilih'),
-              onPressed: () {
-                // Update warna yang dipilih menggunakan StateSetter
-                setDialogState(() {
-                  selectedColor = pickerColor;
-                });
-                // Update juga state utama
-                setState(() {
-                  selectedColor = pickerColor;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    _isInitialized = true;
   }
 
   void _onNavTap(int index) {
@@ -369,24 +119,42 @@ String iconName = iconOptions.entries
         Future.delayed(Duration(milliseconds: 750), () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => TaskPage()),
+            MaterialPageRoute(
+                builder: (context) => TaskPage(
+                      token: _token,
+                    )),
           );
         });
         break;
       case 2:
-      Future.delayed(Duration(milliseconds: 750), () {
+        Future.delayed(Duration(milliseconds: 750), () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Historypage()),
+            MaterialPageRoute(
+                builder: (context) => Historypage(
+                      token: _token,
+                    )),
           );
         });
-      break;
+        break;
+                case 3:
+         Future.delayed(Duration(milliseconds: 750), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => CalendarPage(
+                      token: _token,
+                    )),
+          );
+        });
+        break;
     }
   }
- 
+
   Future<void> _refreshTodayTasks() async {
     setState(() {
-     _todayTasks= getTodayTasks(); // Memanggil ulang fetchTasks untuk mendapatkan data terbaru
+      _todayTasks =
+          getTodayTasks(); // Memanggil ulang fetchTasks untuk mendapatkan data terbaru
     });
   }
 
@@ -401,121 +169,80 @@ String iconName = iconOptions.entries
       throw Exception('Failed to load tasks');
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(235, 235, 235, 1),
       body: RefreshIndicator(
-         onRefresh: _refreshTodayTasks,
+        onRefresh: _refreshTodayTasks,
         child: SingleChildScrollView(
           child: Column(
             children: [
-              HomeAppbar(),
+              HomeAppbar(
+                token: _token,
+              ),
               SizedBox(height: 20),
-              
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
                     margin: EdgeInsets.only(left: 20),
-                    child: Text('Category', style: TextStyle(fontFamily: "Mont-SemiBold", color: Colors.black, fontSize: 17)),
+                    child: Text('Category',
+                        style: TextStyle(
+                            fontFamily: "Mont-SemiBold",
+                            color: Colors.black,
+                            fontSize: 17)),
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder:(context) => CategoryPage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CategoryPage(
+                                    token: _token,
+                                  )));
                     },
                     child: Container(
                       margin: EdgeInsets.only(right: 33),
-                      child: Text('See All', style: TextStyle(fontFamily: "Mont-SemiBold", color: Color.fromRGBO(97, 119, 140, 1), fontSize: 17)),
+                      child: Text('See All',
+                          style: TextStyle(
+                              fontFamily: "Mont-SemiBold",
+                              color: Color.fromRGBO(97, 119, 140, 1),
+                              fontSize: 17)),
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 10),
-              
+
               // Tampilkan loading atau list kategori
-              isLoading 
-                ? Center(child: CircularProgressIndicator())
-                : Container(
-                    child: Column(
-                      children: [
-                        Wrap(
-                          spacing: 45,
-                          runSpacing: 10,
-                          children: [
-                            // Tampilkan kategori yang ada
-                            ...categories.take(categories.length > 8 ? 8 : categories.length).map((cat) => Tooltip(
-                              message: cat.name,
-                              child: Container(
-                                width: 55,
-                                height: 55,
-                                decoration: BoxDecoration(
-                                  color: cat.getColor(),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(cat.getIconData(), color: Colors.white),
-                                      ],
-                                    ),   
-                                  ],
-                                ),
-                              ),
-                            )),
-                            
-                            // Tampilkan tombol tambah jika kategori kurang dari 8
-                            if (categories.length < 8)
-                              Tooltip(
-                                message: "Tambah Kategori",
-                                child: InkWell(
-                                  onTap: showAddCategoryDialog,
-                                  child: Container(
-                                    width: 55,
-                                    height: 55,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(color: Colors.grey, width: 1),
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(Icons.add, color: Colors.black54),
-                                          ],
-                                        ),   
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ]
-                        )
-                      ],
-                    ),
-                  ),
-                  
+              CategoryWidget(
+                token: _token,
+                categories: categories,
+                refreshCategories: _loadCategories,
+                isLoading: isLoading,
+              ),
+
               SizedBox(height: 20),
               Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
                       SizedBox(width: 20),
                       Container(
-                        margin: EdgeInsets.all(0),
-                        child: Text("Today Task", style: TextStyle(color: Colors.black, fontFamily: "Mont-SemiBold", fontSize: 17)))
+                          margin: EdgeInsets.all(0),
+                          child: Text("Today Task",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: "Mont-SemiBold",
+                                  fontSize: 17)))
                     ],
                   ),
-                  TodayTaskList(future:  _todayTasks)
+                  TodayTaskList(future: _todayTasks)
                 ],
               ),
 
@@ -524,9 +251,9 @@ String iconName = iconOptions.entries
           ),
         ),
       ),
-            bottomNavigationBar: BottomBarBubble(
-    color: const Color.fromARGB(255, 255, 255, 255),
-    backgroundColor: Color.fromRGBO(19, 86, 148, 1),
+      bottomNavigationBar: BottomBarBubble(
+        color: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Color.fromRGBO(19, 86, 148, 1),
         items: [
           BottomBarItem(
             iconData: Icons.home,
@@ -539,16 +266,14 @@ String iconName = iconOptions.entries
             iconData: Icons.history,
             // label: 'Notification',
           ),
-          // BottomBarItem(
-          //   iconData: Icons.calendar_month,
-          //   // label: 'Calendar',
-          // ),
+          BottomBarItem(
+            iconData: Icons.calendar_month,
+            // label: 'Calendar',
+          ),
         ],
-         onSelect: _onNavTap,
+        onSelect: _onNavTap,
         selectedIndex: _currentIndex,
       ),
-   
-  
     );
   }
 }

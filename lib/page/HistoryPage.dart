@@ -5,19 +5,28 @@ import 'package:intl/intl.dart';
 import 'package:todolist_app/model/model_board.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:todolist_app/page/CalenderPage.dart';
 import 'package:todolist_app/page/Home.dart';
 import 'package:todolist_app/page/Task.dart';
 
 class Historypage extends StatefulWidget {
-  const Historypage({super.key});
+    final String token;
+
+  const Historypage({super.key, required this.token});
 
   @override
   State<Historypage> createState() => _HistorypageState();
 }
 
 class _HistorypageState extends State<Historypage> {
-  int _currentIndex = 2;
+      late String _token;
 
+  int _currentIndex = 2;
+@override
+void initState() {
+  super.initState();
+  _token = widget.token; // <-- pindahkan ini ke atas dulu
+}
   Future<List<Board>> getDoneBoard() async {
     final response = await http.get(Uri.parse("http://10.0.2.2:8000/api/done-board"));
     if (response.statusCode == 200) {
@@ -87,7 +96,7 @@ Future<void> deleteTask(int taskId) async {
         Future.delayed(Duration(milliseconds: 750), () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => HomePage()),
+            MaterialPageRoute(builder: (context) => HomePage(token: _token,)),
           );
         });
         break;
@@ -95,15 +104,26 @@ Future<void> deleteTask(int taskId) async {
         Future.delayed(Duration(milliseconds: 750), () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => TaskPage()),
+            MaterialPageRoute(builder: (context) => TaskPage(token: _token,)),
           );
         });
         break;
       case 2:
-        Future.delayed(Duration(milliseconds: 750), () {
+        // Future.delayed(Duration(milliseconds: 750), () {
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => Historypage()),
+        //   );
+        // });
+        break;
+                case 3:
+         Future.delayed(Duration(milliseconds: 750), () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Historypage()),
+            MaterialPageRoute(
+                builder: (context) => CalendarPage(
+                      token: _token,
+                    )),
           );
         });
         break;
@@ -272,9 +292,9 @@ Future<void> deleteTask(int taskId) async {
           BottomBarItem(
             iconData: Icons.history,
           ),
-          // BottomBarItem(
-          //   iconData: Icons.calendar_month,
-          // ),
+          BottomBarItem(
+            iconData: Icons.calendar_month,
+          ),
         ],
         onSelect: _onNavTap,
         selectedIndex: _currentIndex,

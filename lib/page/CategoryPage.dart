@@ -5,22 +5,31 @@ import 'package:todolist_app/model/taskmodel.dart';
 import 'dart:convert';
 
 import 'package:todolist_app/page/DetailTask.dart';
+import 'package:todolist_app/service/categoryservice.dart';
 
 class CategoryPage extends StatefulWidget {
-  const CategoryPage({super.key});
+    final String token;
+
+  const CategoryPage({super.key, required this.token});
+  
 
   @override
   State<CategoryPage> createState() => _CategoryPageState();
 }
 
 class _CategoryPageState extends State<CategoryPage> {
+      late String _token;
+
   int? selectedCategoryId;
+    final CategoryService _categoryService = CategoryService();
+
 
   List<dynamic> categories = [];
 
 @override
 void initState() {
   super.initState();
+    _token = widget.token; // <-- pindahkan ini ke atas dulu
   fetchCategories();
   fetchAllTasks(); // tampilkan semua task secara default
 }
@@ -37,16 +46,18 @@ Future<void> fetchAllTasks() async {
   }
 }
 
-  Future<void> fetchCategories() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/categories')); // sesuaikan URL
-    if (response.statusCode == 200) {
-      setState(() {
-        categories = json.decode(response.body);
-      });
-    } else {
-      throw Exception('Failed to load categories');
-    }
+Future<void> fetchCategories() async {
+  try {
+    final fetchedCategories = await _categoryService.getCategories(_token);
+    setState(() {
+      categories = fetchedCategories;
+    });
+  } catch (e) {
+    print('Error fetching categories: $e');
+    // Bisa juga tampilkan snackbar atau error UI di sini
   }
+}
+
   Color getPriorityColor(String priority) {
   switch (priority.toLowerCase()) {
     case 'urgent':
@@ -76,8 +87,8 @@ Future<void> fetchTasksByCategory(int categoryId) async {
   }
 }
 
-  void showAddCategoryDialog() {
-  String categoryName = '';
+void showAddCategoryDialog() {
+  TextEditingController categoryNameController = TextEditingController();
   String selectedIcon = 'label';
   Color selectedColor = Colors.blue;
 
@@ -96,85 +107,80 @@ Future<void> fetchTasksByCategory(int categoryId) async {
     'restaurant': Icons.restaurant,
     'label': Icons.label,
   };
-  
 
   showDialog(
     context: context,
     builder: (context) {
-      return AlertDialog(
-        title: Text('Tambah Kategori'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: InputDecoration(labelText: 'Nama Kategori'),
-                onChanged: (value) {
-                  categoryName = value;
-                },
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Tambah Kategori'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: categoryNameController,
+                    decoration: InputDecoration(labelText: 'Nama Kategori'),
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: selectedIcon,
+                    decoration: InputDecoration(labelText: 'Pilih Icon'),
+                    items: iconChoices.keys.map((iconName) {
+                      return DropdownMenuItem<String>(
+                        value: iconName,
+                        child: Row(
+                          children: [
+                            Icon(iconChoices[iconName]),
+                            SizedBox(width: 10),
+                            Text(iconName),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedIcon = value!;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  Text('Pilih Warna'),
+                  BlockPicker(
+                    pickerColor: selectedColor,
+                    onColorChanged: (color) {
+                      setState(() {
+                        selectedColor = color;
+                      });
+                    },
+                  ),
+                ],
               ),
-              DropdownButtonFormField<String>(
-                value: selectedIcon,
-                decoration: InputDecoration(labelText: 'Pilih Icon'),
-                items: iconChoices.keys.map((iconName) {
-                  return DropdownMenuItem<String>(
-                    value: iconName,
-                    child: Row(
-                      children: [
-                        Icon(iconChoices[iconName]),
-                        SizedBox(width: 10),
-                        Text(iconName),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedIcon = value!;
-                  });
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Batal')),
+              ElevatedButton(
+                onPressed: () async {
+                  final name = categoryNameController.text.trim();
+                  final icon = selectedIcon;
+                  final color = '#${selectedColor.value.toRadixString(16).substring(2)}'; // hex color
+
+                  try {
+                 await _categoryService.createCategory(name, widget.token, icon, color);
+    Navigator.pop(context);
+    await fetchCategories();
+                    // Optional: refresh data here
+                  } catch (e) {
+                    print('Error: $e');
+                  }
                 },
-              ),
-              SizedBox(height: 10),
-              Text('Pilih Warna'),
-              BlockPicker(
-                pickerColor: selectedColor,
-                onColorChanged: (color) {
-                  selectedColor = color;
-                },
+                child: Text('Simpan'),
               ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context), child: Text('Batal')),
-          ElevatedButton(
-            onPressed: () async {
-              if (categoryName.isEmpty) return;
-
-              final body = {
-                'name': categoryName,
-                'user_id': '6', // ganti sesuai user_id yang aktif
-                'icon': selectedIcon,
-                'color': '#${selectedColor.value.toRadixString(16).substring(2)}',
-              };
-
-              final response = await http.post(
-                Uri.parse('http://10.0.2.2:8000/api/categories'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode(body),
-              );
-
-              if (response.statusCode == 200 || response.statusCode == 201) {
-                Navigator.pop(context);
-                fetchCategories(); // refresh
-              } else {
-                print('Gagal simpan kategori');
-              }
-            },
-            child: Text('Simpan'),
-          ),
-        ],
+          );
+        },
       );
     },
   );
@@ -254,9 +260,9 @@ Future<void> fetchTasksByCategory(int categoryId) async {
   ),
 
   ...categories.map((category) {
-    final int id = category['id'];
-    final String name = category['name'];
-    final String colorHex = category['color'] ?? '#888888';
+    final int id = category.id;
+    final String name = category.name;
+final String colorHex = category.color ?? '#888888';
     final Color color = Color(int.parse(colorHex.substring(1, 7), radix: 16) + 0xFF000000);
     final bool isSelected = selectedCategoryId == id;
 
