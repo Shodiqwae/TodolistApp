@@ -563,7 +563,7 @@ final int statusId = selectedStatusObject.id ?? 1;
   Color getPriorityColor(String priority) {
     switch (priority) {
       case 'high': return Colors.red;
-      case 'medium': return Colors.orange;
+      case 'netral': return Colors.orange;
       case 'low': return Colors.green;
       case 'urgent': return Colors.purple;
       default: return Colors.grey;

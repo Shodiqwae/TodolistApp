@@ -33,13 +33,13 @@ class _TaskState extends State<TaskPage> {
   void initState() {
     super.initState();
     _token = widget.token;
-    futureTasks = fetchTasks();
+    futureTasks = fetchTasks(_token);
     loadTasks();
   }
 
   void _searchTasks(String query) {
     setState(() {
-      futureTasks = fetchTasks().then((tasks) => tasks
+      futureTasks = fetchTasks(_token).then((tasks) => tasks
           .where(
               (task) => task.name.toLowerCase().contains(query.toLowerCase()))
           .toList());
@@ -48,7 +48,7 @@ class _TaskState extends State<TaskPage> {
 
   void loadTasks() {
     setState(() {
-      futureTasks = fetchTasks(); // fungsi dari TaskService atau semacamnya
+      futureTasks = fetchTasks(_token); // fungsi dari TaskService atau semacamnya
     });
   }
 
@@ -172,6 +172,7 @@ class _TaskState extends State<TaskPage> {
             ),
             TaskWidget(
               futuretasks: futureTasks,
+              token: _token,
             )
           ],
         ),
@@ -182,7 +183,7 @@ class _TaskState extends State<TaskPage> {
           showDialog(
             context: context,
             builder: (context) => TaskFormDialog(
-              onTaskCreated: loadTasks,
+              onTaskCreated: loadTasks, token: _token,
             ),
           );
         },

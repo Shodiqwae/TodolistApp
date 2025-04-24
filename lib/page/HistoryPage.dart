@@ -27,35 +27,64 @@ void initState() {
   super.initState();
   _token = widget.token; // <-- pindahkan ini ke atas dulu
 }
-  Future<List<Board>> getDoneBoard() async {
-    final response = await http.get(Uri.parse("http://10.0.2.2:8000/api/done-board"));
+Future<List<Board>> getDoneBoard() async {
+  try {
+    final response = await http.get(
+      Uri.parse("http://10.0.2.2:8000/api/done-board"),
+      headers: {
+        'Authorization': 'Bearer $_token',
+        'Accept': 'application/json',
+      },
+    );
+    
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+    
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = jsonDecode(response.body);
       return jsonData.map((item) => Board.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to load data');
+      throw Exception('Failed to load data: ${response.statusCode} - ${response.body}');
     }
+  } catch (e) {
+    print('Error in getDoneBoard: $e');
+    throw Exception('Failed to load data: $e');
   }
+}
 
   // Fungsi untuk menghapus semua data board yang selesai
-  Future<void> deleteAllDoneBoards() async {
-    final response = await http.delete(Uri.parse("http://10.0.2.2:8000/api/delete-done-boards"));
-    if (response.statusCode == 200) {
-      setState(() {});
-    } else {
-      throw Exception('Failed to delete boards');
-    }
+Future<void> deleteAllDoneBoards() async {
+  final response = await http.delete(
+    Uri.parse("http://10.0.2.2:8000/api/delete-done-boards"),
+    headers: {
+      'Authorization': 'Bearer $_token',
+      'Accept': 'application/json',
+    },
+  );
+  if (response.statusCode == 200) {
+    setState(() {});
+  } else {
+    throw Exception('Failed to delete boards');
   }
+}
+
 
   // Fungsi untuk menghapus task tertentu
-Future<void> deleteTask(int taskId) async {
-  final response = await http.delete(Uri.parse("http://10.0.2.2:8000/api/delete-board/$taskId"));
+Future<void> deleteboard(int taskId) async {
+  final response = await http.delete(
+    Uri.parse("http://10.0.2.2:8000/api/delete-board/$taskId"),
+    headers: {
+      'Authorization': 'Bearer $_token',
+      'Accept': 'application/json',
+    },
+  );
   if (response.statusCode == 200) {
     setState(() {});
   } else {
     throw Exception('Failed to delete task');
   }
 }
+
 
 
   // Fungsi untuk menampilkan popup konfirmasi
@@ -253,13 +282,13 @@ Future<void> deleteTask(int taskId) async {
                                         margin: EdgeInsets.only(right: 10),
                                         child: IconButton(onPressed: () {
                                           _showDeleteConfirmationDialog(() {
-                                  deleteTask(int.parse(board.id.toString()));});
+                                  deleteboard(int.parse(board.id.toString()));});
                                         }, icon: Icon(Icons.delete_forever,size: 30,color: Colors.red,)))
                                   // IconButton(
                                   //   icon: Icon(Icons.delete),
                                   //   onPressed: () {
                                   //     _showDeleteConfirmationDialog(() {
-                                  // deleteTask(int.parse(board.id.toString()));                                        });
+                                  // deleteboard(int.parse(board.id.toString()));                                        });
                                   //   },
                                   // )
                                     ],

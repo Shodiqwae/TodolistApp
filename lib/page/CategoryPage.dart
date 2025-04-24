@@ -36,7 +36,12 @@ void initState() {
 
 
 Future<void> fetchAllTasks() async {
-  final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/tasks')); // sesuaikan URL
+  final response = await http.get(
+    Uri.parse('http://10.0.2.2:8000/api/tasks'),
+    headers: {
+      'Authorization': 'Bearer $_token', // Menambahkan token di header
+    },
+  );
   if (response.statusCode == 200) {
     setState(() {
       tasks = json.decode(response.body);

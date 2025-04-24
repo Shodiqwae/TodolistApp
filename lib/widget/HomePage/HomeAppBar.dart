@@ -42,33 +42,44 @@ class _HomeAppbarState extends State<HomeAppbar> {
     }
   }
 
-  Future<void> fetchCompletionPercent() async {
-    final response = await http
-        .get(Uri.parse("http://10.0.2.2:8000/api/board-completion-percentage"));
+Future<void> fetchCompletionPercent() async {
+  final response = await http.get(
+    Uri.parse("http://10.0.2.2:8000/api/board-completion-percentage"),
+    headers: {
+      'Authorization': 'Bearer $_token',
+      'Accept': 'application/json',
+    },
+  );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        completionPercent = (data['percentage'] / 100).clamp(0.0, 1.0);
-      });
-    } else {
-      throw Exception('Failed to load percent data');
-    }
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    setState(() {
+      completionPercent = (data['percentage'] / 100).clamp(0.0, 1.0);
+    });
+  } else {
+    throw Exception('Failed to load percent data');
   }
+}
 
-  Future<void> fetchTodayTaskPercent() async {
-    final response = await http
-        .get(Uri.parse("http://10.0.2.2:8000/api/today-task-completion"));
+Future<void> fetchTodayTaskPercent() async {
+  final response = await http.get(
+    Uri.parse("http://10.0.2.2:8000/api/today-task-completion"),
+    headers: {
+      'Authorization': 'Bearer $_token',
+      'Accept': 'application/json',
+    },
+  );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        todayPercent = (data['percentage'] / 100).clamp(0.0, 1.0);
-      });
-    } else {
-      throw Exception('Failed to load today task percent');
-    }
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    setState(() {
+      todayPercent = (data['percentage'] / 100).clamp(0.0, 1.0);
+    });
+  } else {
+    throw Exception('Failed to load today task percent');
   }
+}
+
 
   @override
   void initState() {

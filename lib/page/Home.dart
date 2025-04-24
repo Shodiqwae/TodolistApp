@@ -8,13 +8,10 @@ import 'package:todolist_app/page/CalenderPage.dart';
 import 'package:todolist_app/page/CategoryPage.dart';
 import 'package:todolist_app/page/HistoryPage.dart';
 import 'package:todolist_app/page/Task.dart';
-import 'package:todolist_app/page/TaskFormCreate.dart';
-import 'package:todolist_app/page/TaskWidget.dart';
 import 'package:todolist_app/service/categoryservice.dart';
 import 'package:todolist_app/service/tasksservice.dart';
 import 'package:todolist_app/widget/HomePage/CategoryWidget.dart';
 import 'package:todolist_app/widget/HomePage/HomeAppBar.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -54,14 +51,14 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _token = widget.token; // <-- pindahkan ini ke atas dulu
     _loadCategories();
-    futureTasks = fetchTasks();
+    futureTasks = fetchTasks(_token);
     loadTasks();
     _todayTasks = getTodayTasks();
   }
 
   void loadTasks() {
     setState(() {
-      futureTasks = fetchTasks(); // fungsi dari TaskService atau semacamnya
+      futureTasks = fetchTasks(_token); // fungsi dari TaskService atau semacamnya
     });
   }
 
@@ -158,17 +155,23 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<List<Board>> getTodayTasks() async {
-    final String baseUrl = 'http://10.0.2.2:8000'; // Ganti dengan URL API kamu
-    final response = await http.get(Uri.parse('$baseUrl/api/today-tasks'));
+ Future<List<Board>> getTodayTasks() async {
+  final String baseUrl = 'http://10.0.2.2:8000'; // Ganti dengan URL API kamu
+  final response = await http.get(
+    Uri.parse('$baseUrl/api/today-tasks'),
+    headers: {
+      'Authorization': 'Bearer $_token', // Mengirimkan token sebagai header
+    },
+  );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((boardJson) => Board.fromJson(boardJson)).toList();
-    } else {
-      throw Exception('Failed to load tasks');
-    }
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body);
+    return data.map((boardJson) => Board.fromJson(boardJson)).toList();
+  } else {
+    throw Exception('Failed to load tasks');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

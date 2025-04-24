@@ -36,29 +36,33 @@ class _CalendarPageState extends State<CalendarPage> {
     fetchCalendarEvents();
   }
 
-  Future<void> fetchCalendarEvents() async {
-    final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/calendar-events'), // Ganti dengan URL endpoint API kamu
-    );
+Future<void> fetchCalendarEvents() async {
+  final response = await http.get(
+    Uri.parse('http://10.0.2.2:8000/api/calendar-events'),
+    headers: {
+      'Authorization': 'Bearer $_token',
+      'Accept': 'application/json',
+    },
+  );
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      Map<DateTime, List<CalendarEvent>> eventMap = {};
+  if (response.statusCode == 200) {
+    List<dynamic> data = json.decode(response.body);
+    Map<DateTime, List<CalendarEvent>> eventMap = {};
 
-      for (var item in data) {
-        final event = CalendarEvent.fromJson(item);
-        final eventDate = DateTime.utc(
-            event.date.year, event.date.month, event.date.day);
-        eventMap.putIfAbsent(eventDate, () => []).add(event);
-      }
-
-      setState(() {
-        _events = eventMap;
-      });
-    } else {
-      print('Gagal mengambil data kalender');
+    for (var item in data) {
+      final event = CalendarEvent.fromJson(item);
+      final eventDate = DateTime.utc(event.date.year, event.date.month, event.date.day);
+      eventMap.putIfAbsent(eventDate, () => []).add(event);
     }
+
+    setState(() {
+      _events = eventMap;
+    });
+  } else {
+    print('Gagal mengambil data kalender: ${response.statusCode}');
   }
+}
+
 
     void _onNavTap(int index) {
     if (index == _currentIndex) return;

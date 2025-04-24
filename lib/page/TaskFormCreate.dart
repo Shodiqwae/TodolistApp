@@ -4,9 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:todolist_app/service/tasksservice.dart';
 
 class TaskFormDialog extends StatefulWidget {
+    final String token;
+
    final VoidCallback onTaskCreated;
 
-  TaskFormDialog({required this.onTaskCreated});
+  TaskFormDialog({required this.onTaskCreated, required this.token});
   @override
   _TaskFormDialogState createState() => _TaskFormDialogState();
 }
@@ -20,22 +22,27 @@ class _TaskFormDialogState extends State<TaskFormDialog> {
   List<Map<String, dynamic>> _categories = []; // Menyimpan kategori dengan id dan nama
 
   // Fungsi untuk mengambil data kategori dari API Laravel
-  Future<void> _fetchCategories() async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/categories'); // Ganti dengan URL API kategori
-    final response = await http.get(url);
+Future<void> _fetchCategories() async {
+  final url = Uri.parse('http://10.0.2.2:8000/api/categories'); // Ganti dengan URL API kategori
+  final response = await http.get(
+    url,
+    headers: {
+      'Authorization': 'Bearer ${widget.token}', // Pastikan token dikirim
+    },
+  );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      print('Received categories: $data'); // Log data kategori
-      setState(() {
-        _categories = data.map((category) {
-          return {'id': category['id'], 'name': category['name']};
-        }).toList();
-      });
-    } else {
-      throw Exception('Failed to load categories. Status code: ${response.statusCode}');
-    }
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body);
+    setState(() {
+      _categories = data.map((category) {
+        return {'id': category['id'], 'name': category['name']};
+      }).toList();
+    });
+  } else {
+    throw Exception('Failed to load categories. Status code: ${response.statusCode}');
   }
+}
+
 
   @override
   void initState() {
@@ -49,7 +56,12 @@ class _TaskFormDialogState extends State<TaskFormDialog> {
       _formKey.currentState?.save();
       try {
         // Kirim data ke API untuk membuat task
-        final response = await createTask(_taskName, _selectedCategory, _priority);
+    final response = await createTask(
+  _taskName,
+  _selectedCategory,
+  _priority,
+  widget.token, // Kirim token dari constructor
+  );
         if (response != null) {
   widget.onTaskCreated(); // Memanggil callback
   Navigator.of(context).pop();

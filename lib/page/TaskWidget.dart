@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:todolist_app/model/taskmodel.dart';
@@ -6,8 +5,10 @@ import 'package:todolist_app/page/DetailTask.dart';
 
 class TaskWidget extends StatefulWidget {
   final Future<List<Task>> futuretasks;
+  final String token;
 
-  TaskWidget({required this.futuretasks});
+
+  TaskWidget({required this.futuretasks, required this.token});
 
   @override
   State<TaskWidget> createState() => _TaskWidgetState();
@@ -81,7 +82,7 @@ class _TaskWidgetState extends State<TaskWidget> {
               width: 370,
               height: 520,
               child: ListView.builder(
-          itemCount: currentTasks.length,
+                itemCount: currentTasks.length,
                 itemBuilder: (context, index) {
                   final task = currentTasks[index];
                   return GestureDetector(
