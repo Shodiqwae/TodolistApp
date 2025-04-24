@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:todolist_app/model/category.dart';
 
 class CategoryService {
-  final String baseUrl = 'http://10.0.2.2:8000/api';
+  final String baseUrl = 'http://192.168.211.57:8000/api';
   
   // Method untuk mengambil kategori berdasarkan user yang login
 Future<List<Category>> getCategories(String token) async {

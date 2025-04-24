@@ -17,7 +17,7 @@ class TodayTaskList extends StatefulWidget {
 class _TodayTaskListState extends State<TodayTaskList> {
   Future<Task> fetchTaskById(int taskId) async {
   // Implementasikan API atau logic untuk mengambil Task berdasarkan taskId
-  final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/task/$taskId'));
+  final response = await http.get(Uri.parse('http://192.168.211.57:8000/api/task/$taskId'));
   if (response.statusCode == 200) {
     return Task.fromJson(jsonDecode(response.body));
   } else {
@@ -69,7 +69,7 @@ class _TodayTaskListState extends State<TodayTaskList> {
                       child: Container(
                         width: MediaQuery.of(context).size.width * 0.8,
                         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-                        height: 110,
+                        height: 118,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),

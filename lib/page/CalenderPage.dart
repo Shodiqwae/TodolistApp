@@ -38,7 +38,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
 Future<void> fetchCalendarEvents() async {
   final response = await http.get(
-    Uri.parse('http://10.0.2.2:8000/api/calendar-events'),
+    Uri.parse('http://192.168.211.57:8000/api/calendar-events'),
     headers: {
       'Authorization': 'Bearer $_token',
       'Accept': 'application/json',
@@ -119,8 +119,10 @@ Future<void> fetchCalendarEvents() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Kalender Tugas', style: TextStyle(color: Colors.white,fontFamily: "Mont-SemiBold"),),
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color.fromARGB(255, 20, 61, 227),
+        
       ),
       body: Column(
         children: [
@@ -132,7 +134,6 @@ Future<void> fetchCalendarEvents() async {
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
               });
             },
             eventLoader: _getEventsForDay,

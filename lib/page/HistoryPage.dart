@@ -30,7 +30,7 @@ void initState() {
 Future<List<Board>> getDoneBoard() async {
   try {
     final response = await http.get(
-      Uri.parse("http://10.0.2.2:8000/api/done-board"),
+      Uri.parse("http://192.168.211.57:8000/api/done-board"),
       headers: {
         'Authorization': 'Bearer $_token',
         'Accept': 'application/json',
@@ -55,7 +55,7 @@ Future<List<Board>> getDoneBoard() async {
   // Fungsi untuk menghapus semua data board yang selesai
 Future<void> deleteAllDoneBoards() async {
   final response = await http.delete(
-    Uri.parse("http://10.0.2.2:8000/api/delete-done-boards"),
+    Uri.parse("http://192.168.211.57:8000/api/delete-done-boards"),
     headers: {
       'Authorization': 'Bearer $_token',
       'Accept': 'application/json',
@@ -72,7 +72,7 @@ Future<void> deleteAllDoneBoards() async {
   // Fungsi untuk menghapus task tertentu
 Future<void> deleteboard(int taskId) async {
   final response = await http.delete(
-    Uri.parse("http://10.0.2.2:8000/api/delete-board/$taskId"),
+    Uri.parse("http://192.168.211.57:8000/api/delete-board/$taskId"),
     headers: {
       'Authorization': 'Bearer $_token',
       'Accept': 'application/json',
@@ -166,9 +166,15 @@ Future<void> deleteboard(int taskId) async {
         children: [
           Container(
             height: 90,
-            decoration: BoxDecoration(color: Color.fromRGBO(27, 86, 253, 0.98)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [
+                Color.fromRGBO(19, 86, 148, 1),
+                Color.fromRGBO(0, 102, 204, 1)
+              ])
+            ),
             child: Column(
               children: [
+                
                 SizedBox(height: 33),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

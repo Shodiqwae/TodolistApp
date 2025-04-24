@@ -25,7 +25,7 @@ class _HomeAppbarState extends State<HomeAppbar> {
 
   Future<void> fetchUserName() async {
     final response = await http.get(
-      Uri.parse("http://10.0.2.2:8000/api/user"),
+      Uri.parse("http://192.168.211.57:8000/api/user"),
       headers: {
         'Authorization': 'Bearer $_token',
         'Accept': 'application/json',
@@ -44,7 +44,7 @@ class _HomeAppbarState extends State<HomeAppbar> {
 
 Future<void> fetchCompletionPercent() async {
   final response = await http.get(
-    Uri.parse("http://10.0.2.2:8000/api/board-completion-percentage"),
+    Uri.parse("http://192.168.211.57:8000/api/board-completion-percentage"),
     headers: {
       'Authorization': 'Bearer $_token',
       'Accept': 'application/json',
@@ -63,7 +63,7 @@ Future<void> fetchCompletionPercent() async {
 
 Future<void> fetchTodayTaskPercent() async {
   final response = await http.get(
-    Uri.parse("http://10.0.2.2:8000/api/today-task-completion"),
+    Uri.parse("http://192.168.211.57:8000/api/today-task-completion"),
     headers: {
       'Authorization': 'Bearer $_token',
       'Accept': 'application/json',

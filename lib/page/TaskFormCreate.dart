@@ -23,7 +23,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> {
 
   // Fungsi untuk mengambil data kategori dari API Laravel
 Future<void> _fetchCategories() async {
-  final url = Uri.parse('http://10.0.2.2:8000/api/categories'); // Ganti dengan URL API kategori
+  final url = Uri.parse('http://192.168.211.57:8000/api/categories'); // Ganti dengan URL API kategori
   final response = await http.get(
     url,
     headers: {

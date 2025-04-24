@@ -37,7 +37,7 @@ void initState() {
 
 Future<void> fetchAllTasks() async {
   final response = await http.get(
-    Uri.parse('http://10.0.2.2:8000/api/tasks'),
+    Uri.parse('http://192.168.211.57:8000/api/tasks'),
     headers: {
       'Authorization': 'Bearer $_token', // Menambahkan token di header
     },
@@ -82,7 +82,7 @@ Future<void> fetchCategories() async {
   List<dynamic> tasks = [];
 
 Future<void> fetchTasksByCategory(int categoryId) async {
-  final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/tasks/category/$categoryId'));
+  final response = await http.get(Uri.parse('http://192.168.211.57:8000/api/tasks/category/$categoryId'));
   if (response.statusCode == 200) {
     setState(() {
       tasks = json.decode(response.body);
@@ -211,7 +211,7 @@ void showAddCategoryDialog() {
                       margin: const EdgeInsets.only(left: 10),
                       child: IconButton(
                           onPressed: () {
-                            Navigator.pop(context);
+                            Navigator.pop(context, true);
                           },
                           icon: const Icon(Icons.arrow_back, color: Colors.white, size: 27)),
                     ),

@@ -36,7 +36,7 @@ class _DetailTaskState extends State<DetailTask> {
   DateTime? selectedDueDate;
 
 
-  final String baseUrl = "http://10.0.2.2:8000/api";
+  final String baseUrl = "http://192.168.211.57:8000/api";
 
   // Text controllers
   TextEditingController nameController = TextEditingController();

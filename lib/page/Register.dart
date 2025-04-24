@@ -25,7 +25,7 @@ class _RegisterState extends State<Register> {
       return;
     }
 
-    final url = Uri.parse("http://10.0.2.2:8000/api/register");
+    final url = Uri.parse("http://192.168.211.57:8000/api/register");
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

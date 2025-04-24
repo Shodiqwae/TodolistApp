@@ -17,7 +17,7 @@ class TaskWidget extends StatefulWidget {
 class _TaskWidgetState extends State<TaskWidget> {
   Future<void> deleteTask(int id) async {
   final response = await http.delete(
-    Uri.parse('http://10.0.2.2:8000/api/tasks/$id'),
+    Uri.parse('http://192.168.211.57:8000/api/tasks/$id'),
   );
 
   if (response.statusCode == 200) {
@@ -97,7 +97,7 @@ class _TaskWidgetState extends State<TaskWidget> {
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
                           height: 150,
-                          width: 370,
+                          width: 300,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
@@ -138,10 +138,10 @@ class _TaskWidgetState extends State<TaskWidget> {
                                           ),
                                         ),
                                         SizedBox(width: 8),
-                                        IconButton(
-                                          icon: Icon(Icons.delete, color: Colors.red),
-                                          onPressed: () => confirmDelete(task.id),
-                                        ),
+                                        // IconButton(
+                                        //   icon: Icon(Icons.delete, color: Colors.red),
+                                        //   onPressed: () => confirmDelete(task.id),
+                                        // ),
                                       ],
                                     ),
                                   ],

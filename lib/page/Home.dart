@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
   }
 
  Future<List<Board>> getTodayTasks() async {
-  final String baseUrl = 'http://10.0.2.2:8000'; // Ganti dengan URL API kamu
+  final String baseUrl = 'http://192.168.211.57:8000'; // Ganti dengan URL API kamu
   final response = await http.get(
     Uri.parse('$baseUrl/api/today-tasks'),
     headers: {
@@ -199,23 +199,33 @@ class _HomePageState extends State<HomePage> {
                             fontSize: 17)),
                   ),
                   InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => CategoryPage(
-                                    token: _token,
-                                  )));
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(right: 33),
-                      child: Text('See All',
-                          style: TextStyle(
-                              fontFamily: "Mont-SemiBold",
-                              color: Color.fromRGBO(97, 119, 140, 1),
-                              fontSize: 17)),
-                    ),
-                  ),
+  onTap: () async {
+    // Tunggu hasil dari halaman CategoryPage
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CategoryPage(token: _token),
+      ),
+    );
+
+    // Jika ada hasil (misalnya return true dari CategoryPage), refresh
+    if (result == true) {
+      _loadCategories();
+    }
+  },
+  child: Container(
+    margin: EdgeInsets.only(right: 33),
+    child: Text(
+      'See All',
+      style: TextStyle(
+        fontFamily: "Mont-SemiBold",
+        color: Color.fromRGBO(97, 119, 140, 1),
+        fontSize: 17,
+      ),
+    ),
+  ),
+),
+
                 ],
               ),
               SizedBox(height: 10),
