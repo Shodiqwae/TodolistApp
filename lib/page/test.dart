@@ -868,3 +868,109 @@
 //   }
 // }
 
+import 'package:flutter/material.dart';
+
+class SelectableCardExample extends StatefulWidget {
+  @override
+  _SelectableCardExampleState createState() => _SelectableCardExampleState();
+}
+
+class _SelectableCardExampleState extends State<SelectableCardExample> {
+  Set<int> selectedCards = {};
+  bool selectionMode = false;
+
+  List<String> data = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+
+  void onCardLongPress(int index) {
+    setState(() {
+      selectionMode = true;
+      selectedCards.add(index);
+    });
+  }
+
+  void onCardTap(int index) {
+    if (selectionMode) {
+      setState(() {
+        if (selectedCards.contains(index)) {
+          selectedCards.remove(index);
+          if (selectedCards.isEmpty) {
+            selectionMode = false;
+          }
+        } else {
+          selectedCards.add(index);
+        }
+      });
+    } else {
+      print('Tap biasa: ${data[index]}');
+    }
+  }
+
+  void selectAll() {
+    setState(() {
+      selectionMode = true;
+      selectedCards = Set.from(List.generate(data.length, (index) => index));
+    });
+  }
+
+  void clearSelection() {
+    setState(() {
+      selectedCards.clear();
+      selectionMode = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (selectionMode)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: selectAll,
+                  child: Text('Pilih Semua'),
+                ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: clearSelection,
+                  child: Text('Batal Pilih'),
+                ),
+                Spacer(),
+                Text('${selectedCards.length} dipilih', style: TextStyle(fontSize: 15,),),
+              ],
+            ),
+          ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              final isSelected = selectedCards.contains(index);
+
+              return GestureDetector(
+                onTap: () => onCardTap(index),
+                onLongPress: () => onCardLongPress(index),
+                child: Card(
+                  color: isSelected ? Colors.blue.withOpacity(0.5) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    side: isSelected
+                        ? BorderSide(color: Colors.blue, width: 2)
+                        : BorderSide.none,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ListTile(
+                    title: Text(data[index]),
+                    trailing: isSelected
+                        ? Icon(Icons.check_circle, color: Colors.blue)
+                        : null,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}

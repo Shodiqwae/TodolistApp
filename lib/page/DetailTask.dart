@@ -13,7 +13,6 @@ import 'package:todolist_app/widget/DetailTask/BoradDetailForm.dart';
 import 'package:todolist_app/widget/DetailTask/TaskHeader.dart';
 import 'package:intl/intl.dart';
 
-
 class DetailTask extends StatefulWidget {
   final Task task;
 
@@ -35,8 +34,7 @@ class _DetailTaskState extends State<DetailTask> {
   bool isLoading = false;
   DateTime? selectedDueDate;
 
-
-  final String baseUrl = "http://192.168.211.57:8000/api";
+  final String baseUrl = "http://10.0.2.2:8000/api";
 
   // Text controllers
   TextEditingController nameController = TextEditingController();
@@ -46,7 +44,8 @@ class _DetailTaskState extends State<DetailTask> {
   TextEditingController boardTitleController = TextEditingController();
   TextEditingController boardDescriptionController = TextEditingController();
   TextEditingController boardEditTitleController = TextEditingController();
-  TextEditingController boardEditDescriptionController = TextEditingController();
+  TextEditingController boardEditDescriptionController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -69,13 +68,13 @@ class _DetailTaskState extends State<DetailTask> {
           if (statusList.isNotEmpty) {
             selectedStatus = statusList[0].name;
           }
-          
+
           // Initialize boardsByStatus with empty lists for each status
           for (var status in statusList) {
             boardsByStatus[status.name] = [];
           }
         });
-        
+
         // Fetch boards after statuses are loaded
         fetchBoards();
       } else {
@@ -91,36 +90,37 @@ class _DetailTaskState extends State<DetailTask> {
   Future<void> fetchBoards() async {
     setState(() => isLoading = true);
     try {
-      final response = await http.get(Uri.parse('$baseUrl/boards/task/${widget.task.id}'));
-      
+      final response =
+          await http.get(Uri.parse('$baseUrl/boards/task/${widget.task.id}'));
+
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        final List<Board> fetchedBoards = data.map((json) => Board.fromJson(json)).toList();
+        final List<Board> fetchedBoards =
+            data.map((json) => Board.fromJson(json)).toList();
 
         setState(() {
           boards = fetchedBoards;
-          
+
           // Reset boardsByStatus
           for (var status in statusList) {
             boardsByStatus[status.name] = [];
           }
-          
+
           // Group boards by status
           for (var board in boards) {
             if (board.statusId != null) {
               final statusObj = statusList.firstWhere(
-                (status) => status.id == board.statusId,
-                orElse: () => statusList.first
-              );
-              
+                  (status) => status.id == board.statusId,
+                  orElse: () => statusList.first);
+
               String statusName = statusObj.name;
-              
+
               if (boardsByStatus.containsKey(statusName)) {
                 boardsByStatus[statusName]?.add(board);
               }
             }
           }
-          
+
           isBoardAdded = boards.isNotEmpty;
         });
       } else {
@@ -207,11 +207,10 @@ class _DetailTaskState extends State<DetailTask> {
     }
   }
 
-
   Future<void> addBoard() async {
     final title = boardTitleController.text.trim();
     final description = boardDescriptionController.text.trim();
-    
+
     if (title.isEmpty) {
       _showErrorDialog('Title cannot be empty');
       return;
@@ -220,25 +219,25 @@ class _DetailTaskState extends State<DetailTask> {
     setState(() => isLoading = true);
     try {
       // Find the status ID from the selected status name
-final selectedStatusObject = statusList.firstWhere(
-  (status) => status.name == "pending",
-  orElse: () => statusList.first,
-);
-final int statusId = selectedStatusObject.id ?? 1;
+      final selectedStatusObject = statusList.firstWhere(
+        (status) => status.name == "pending",
+        orElse: () => statusList.first,
+      );
+      final int statusId = selectedStatusObject.id ?? 1;
 
-      
- final response = await http.post(
-  Uri.parse('$baseUrl/boards'),
-  headers: {'Content-Type': 'application/json'},
-  body: jsonEncode({
-    'title': title,
-    'description': description,
-    'status_id': statusId,
-    'tasks_id': widget.task.id,
-    'due_date': selectedDueDate != null ? selectedDueDate!.toIso8601String() : null, // ✅ Pastikan validasi tanggal
-  }),
-);
-
+      final response = await http.post(
+        Uri.parse('$baseUrl/boards'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'title': title,
+          'description': description,
+          'status_id': statusId,
+          'tasks_id': widget.task.id,
+          'due_date': selectedDueDate != null
+              ? selectedDueDate!.toIso8601String()
+              : null, // ✅ Pastikan validasi tanggal
+        }),
+      );
 
       if (response.statusCode == 201) {
         Board newBoard;
@@ -247,29 +246,30 @@ final int statusId = selectedStatusObject.id ?? 1;
         } catch (e) {
           print('Error parsing response: $e');
           // Create a new board with the entered values as fallback
-          final newId = boards.isNotEmpty ? boards.map((b) => b.id ?? 0).reduce(max) + 1 : 1;
-          
-          newBoard = Board(
-  id: newId,
-  title: title,
-  description: description,
-  statusId: statusId,
-  tasksId: widget.task.id,
-  dueDate: selectedDueDate,
-);
+          final newId = boards.isNotEmpty
+              ? boards.map((b) => b.id ?? 0).reduce(max) + 1
+              : 1;
 
+          newBoard = Board(
+            id: newId,
+            title: title,
+            description: description,
+            statusId: statusId,
+            tasksId: widget.task.id,
+            dueDate: selectedDueDate,
+          );
         }
-        
+
         setState(() {
           boards.add(newBoard);
           boardsByStatus[selectedStatus]?.add(newBoard);
           isBoardAdded = true;
         });
-        
+
         boardTitleController.clear();
         boardDescriptionController.clear();
         Navigator.pop(context);
-        
+
         // Reload boards to ensure consistency
         fetchBoards();
       } else {
@@ -285,7 +285,7 @@ final int statusId = selectedStatusObject.id ?? 1;
   Future<void> updateBoard(Board board) async {
     final title = boardEditTitleController.text.trim();
     final description = boardEditDescriptionController.text.trim();
-    
+
     if (title.isEmpty) {
       _showErrorDialog('Title cannot be empty');
       return;
@@ -298,9 +298,9 @@ final int statusId = selectedStatusObject.id ?? 1;
         (status) => status.name == editBoardSelectedStatus,
         orElse: () => statusList.first,
       );
-      
+
       final int statusId = selectedStatusObject.id ?? board.statusId ?? 1;
-      
+
       final response = await http.put(
         Uri.parse('$baseUrl/boards/${board.id}'),
         headers: {'Content-Type': 'application/json'},
@@ -325,31 +325,30 @@ final int statusId = selectedStatusObject.id ?? 1;
             tasksId: widget.task.id,
           );
         }
-        
+
         setState(() {
           // Remove the old board from its previous status group
           if (board.statusId != null) {
             final oldStatusObj = statusList.firstWhere(
-              (status) => status.id == board.statusId,
-              orElse: () => statusList.first
-            );
-            
+                (status) => status.id == board.statusId,
+                orElse: () => statusList.first);
+
             final oldStatusName = oldStatusObj.name;
             boardsByStatus[oldStatusName]?.removeWhere((b) => b.id == board.id);
           }
-          
+
           // Update the board in the boards list
           final index = boards.indexWhere((b) => b.id == board.id);
           if (index != -1) {
             boards[index] = updatedBoard;
           }
-          
+
           // Add the board to its new status group
           boardsByStatus[editBoardSelectedStatus]?.add(updatedBoard);
         });
-        
+
         Navigator.pop(context);
-        
+
         // Reload boards to ensure consistency
         fetchBoards();
       } else {
@@ -470,56 +469,55 @@ final int statusId = selectedStatusObject.id ?? 1;
     if (selectedStatus.isEmpty && statusList.isNotEmpty) {
       selectedStatus = statusList[0].name;
     }
-    
- showDialog(
-  context: context,
-  builder: (_) {
-    return StatefulBuilder(
-      builder: (context, setStateDialog) {
-        return AddBoardForm(
-          titleController: boardTitleController,
-          descriptionController: boardDescriptionController,
-          onSave: addBoard,
-          onCancel: () {
-            boardTitleController.clear();
-            boardDescriptionController.clear();
-            Navigator.pop(context);
-          },
-          dueDate: selectedDueDate,
-          onDueDateSelected: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(2020),
-              lastDate: DateTime(2100),
+
+    showDialog(
+      context: context,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AddBoardForm(
+              titleController: boardTitleController,
+              descriptionController: boardDescriptionController,
+              onSave: addBoard,
+              onCancel: () {
+                boardTitleController.clear();
+                boardDescriptionController.clear();
+                Navigator.pop(context);
+              },
+              dueDate: selectedDueDate,
+              onDueDateSelected: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null) {
+                  setState(() => selectedDueDate = picked); // update di parent
+                  setStateDialog(
+                      () {}); // update di dalam dialog biar UI refresh
+                }
+              },
             );
-            if (picked != null) {
-              setState(() => selectedDueDate = picked); // update di parent
-              setStateDialog(() {}); // update di dalam dialog biar UI refresh
-            }
           },
         );
       },
     );
-  },
-);
-
   }
 
   void showBoardDetailDialog(Board board) {
     boardEditTitleController.text = board.title;
     boardEditDescriptionController.text = board.description ?? '';
-    
+
     // Find the status name from the status ID
     final statusObj = statusList.firstWhere(
-      (status) => status.id == board.statusId,
-      orElse: () => statusList.first
-    );
-    
+        (status) => status.id == board.statusId,
+        orElse: () => statusList.first);
+
     setState(() {
       editBoardSelectedStatus = statusObj.name;
     });
-    
+
     showDialog(
       context: context,
       builder: (_) => BoardDetailForm(
@@ -544,58 +542,71 @@ final int statusId = selectedStatusObject.id ?? 1;
   // Utility methods
   Color getStatusColor(String statusName) {
     switch (statusName) {
-      case 'pending': return Colors.orange;
-      case 'in_progress': return Colors.blue;
-      case 'done': return Colors.green;
-      default: return Colors.grey;
+      case 'pending':
+        return Colors.orange;
+      case 'in_progress':
+        return Colors.blue;
+      case 'done':
+        return Colors.green;
+      default:
+        return Colors.grey;
     }
   }
 
   String getDisplayLabel(String statusName) {
     switch (statusName) {
-      case 'pending': return 'Not Started';
-      case 'in_progress': return 'In Progress';
-      case 'done': return 'Done';
-      default: return statusName;
+      case 'pending':
+        return 'Not Started';
+      case 'in_progress':
+        return 'In Progress';
+      case 'done':
+        return 'Done';
+      default:
+        return statusName;
     }
   }
 
   Color getPriorityColor(String priority) {
     switch (priority) {
-      case 'high': return Colors.red;
-      case 'netral': return Colors.orange;
-      case 'low': return Colors.green;
-      case 'urgent': return Colors.purple;
-      default: return Colors.grey;
+      case 'high':
+        return Colors.red;
+      case 'netral':
+        return Colors.orange;
+      case 'low':
+        return Colors.green;
+      case 'urgent':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
-@override
-Widget build(BuildContext context) {
-      print('Task: ${widget.task.name}, Priority: ${widget.task.priority}');  // Debug output
+  @override
+  Widget build(BuildContext context) {
+    print(
+        'Task: ${widget.task.name}, Priority: ${widget.task.priority}'); // Debug output
 
-  return Scaffold(
-    
-    backgroundColor: Colors.white,
-    body: Stack(
-      children: [
-        Column(
-          children: [
-            TaskHeader(
-              name: widget.task.name,
-              priority: widget.task.priority,
-              onAdd: showOptionDialog,
-              onBack: () => Navigator.pop(context),
-              getPriorityColor: getPriorityColor,
-            ),
-            const SizedBox(height: 10),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              TaskHeader(
+                name: widget.task.name,
+                priority: widget.task.priority,
+                onAdd: showOptionDialog,
+                onBack: () => Navigator.pop(context, true),
+                getPriorityColor: getPriorityColor,
+              ),
+              const SizedBox(height: 10),
 
-            // Membungkus bagian konten setelah TaskHeader dengan SingleChildScrollView
-            Expanded(
-              child: SingleChildScrollView(
+              // Membungkus bagian konten setelah TaskHeader dengan SingleChildScrollView
+              Expanded(
+                child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      if (isBoardAdded) 
+                      if (isBoardAdded)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: BoardsSection(
@@ -611,24 +622,26 @@ Widget build(BuildContext context) {
                           ),
                         ),
                       const SizedBox(height: 10),
-                      // Expanded digunakan di dalam ListView untuk menjaga panjangnya agar tetap responsif
                       ListView.builder(
-                        shrinkWrap: true, // Membuat ListView tidak menghabiskan ruang secara penuh
+                        shrinkWrap:
+                            true, 
                         itemCount: explanations.length,
                         itemBuilder: (context, index) {
                           final item = explanations[index];
                           final isEditing = editingId == item.id;
-              
+
                           return GestureDetector(
                             onTap: () {
                               setState(() {
                                 editingId = item.id;
                                 editingNameController.text = item.name;
-                                editingDeskripsiController.text = item.deskripsi ?? '';
+                                editingDeskripsiController.text =
+                                    item.deskripsi ?? '';
                               });
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -647,7 +660,8 @@ Widget build(BuildContext context) {
                                             fillColor: Colors.white,
                                             border: InputBorder.none,
                                           ),
-                                          onEditingComplete: () => saveEditedExplanation(item),
+                                          onEditingComplete: () =>
+                                              saveEditedExplanation(item),
                                         )
                                       : Text(
                                           item.name,
@@ -659,9 +673,12 @@ Widget build(BuildContext context) {
                                   SizedBox(height: 4),
                                   isEditing
                                       ? TextField(
-                                          controller: editingDeskripsiController,
+                                          controller:
+                                              editingDeskripsiController,
                                           focusNode: FocusNode(),
-                                          style: TextStyle(fontSize: 16, color: Colors.black),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black),
                                           cursorColor: Colors.black,
                                           decoration: InputDecoration(
                                             filled: true,
@@ -669,7 +686,8 @@ Widget build(BuildContext context) {
                                             border: InputBorder.none,
                                           ),
                                           maxLines: null,
-                                          onEditingComplete: () => saveEditedExplanation(item),
+                                          onEditingComplete: () =>
+                                              saveEditedExplanation(item),
                                         )
                                       : Text(
                                           item.deskripsi ?? '',
@@ -684,21 +702,19 @@ Widget build(BuildContext context) {
                       ),
                     ],
                   ),
-                        
+                ),
+              ),
+            ],
+          ),
+          if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
             ),
-          ],
-        ),
-        if (isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.3),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 }

@@ -36,12 +36,11 @@ class BoardsSection extends StatelessWidget {
           
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    
                     children: [
                       StatusLabel(
                         label: getDisplayLabel(status.name),

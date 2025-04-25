@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Authservice{
-  final String baseUrl = 'http://192.168.211.57:8000/api'; // Ganti dengan URL API Anda
+  final String baseUrl = 'http://10.0.2.2:8000/api'; // Ganti dengan URL API Anda
 
   Future<Map<String, dynamic>> register(String name, String email, String password, String passwordConfirmation) async {
     final response = await http.post(

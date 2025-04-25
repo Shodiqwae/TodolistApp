@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:todolist_app/model/category.dart';
+import 'package:todolist_app/page/CategoryPage.dart';
 import 'package:todolist_app/service/categoryservice.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class CategoryWidget extends StatefulWidget {
   final String token;
@@ -25,13 +25,13 @@ class CategoryWidget extends StatefulWidget {
 }
 
 class _CategoryWidgetState extends State<CategoryWidget> {
+  late String _token;
+
   final CategoryService _categoryService = CategoryService();
 
   // Nilai default untuk kategori baru
 
   final TextEditingController categoryNameController = TextEditingController();
-
-
 
   @override
   void dispose() {
@@ -39,159 +39,179 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _token = widget.token;
+  }
 
   // Method untuk menampilkan dialog pembuatan kategori
 // Method untuk menampilkan dialog pembuatan kategori
-void showAddCategoryDialog() {
-  TextEditingController categoryNameController = TextEditingController();
-  String selectedIcon = 'label';
-  Color selectedColor = Colors.blue;
+  void showAddCategoryDialog() {
+    TextEditingController categoryNameController = TextEditingController();
+    String selectedIcon = 'label';
+    Color selectedColor = Colors.blue;
 
-  final iconChoices = {
-    'work': Icons.work,
-    'person': Icons.person,
-    'flight': Icons.flight,
-    'computer': Icons.computer,
-    'home': Icons.home,
-    'shopping_cart': Icons.shopping_cart,
-    'health_and_safety': Icons.health_and_safety,
-    'school': Icons.school,
-    'attach_money': Icons.attach_money,
-    'people': Icons.people,
-    'movie': Icons.movie,
-    'restaurant': Icons.restaurant,
-    'label': Icons.label,
-  };
+    final iconChoices = {
+      'work': Icons.work,
+      'person': Icons.person,
+      'flight': Icons.flight,
+      'computer': Icons.computer,
+      'home': Icons.home,
+      'shopping_cart': Icons.shopping_cart,
+      'health_and_safety': Icons.health_and_safety,
+      'school': Icons.school,
+      'attach_money': Icons.attach_money,
+      'people': Icons.people,
+      'movie': Icons.movie,
+      'restaurant': Icons.restaurant,
+      'label': Icons.label,
+    };
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text('Tambah Kategori'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: categoryNameController,
-                    decoration: InputDecoration(labelText: 'Nama Kategori'),
-                  ),
-                  DropdownButtonFormField<String>(
-                    value: selectedIcon,
-                    decoration: InputDecoration(labelText: 'Pilih Icon'),
-                    items: iconChoices.keys.map((iconName) {
-                      return DropdownMenuItem<String>( 
-                        value: iconName,
-                        child: Row(
-                          children: [
-                            Icon(iconChoices[iconName]),
-                            SizedBox(width: 10),
-                            Text(iconName),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedIcon = value!;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  Text('Pilih Warna'),
-                  BlockPicker(
-                    pickerColor: selectedColor,
-                    onColorChanged: (color) {
-                      setState(() {
-                        selectedColor = color;
-                      });
-                    },
-                  ),
-                ],
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Tambah Kategori'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: categoryNameController,
+                      decoration: InputDecoration(labelText: 'Nama Kategori'),
+                    ),
+                    DropdownButtonFormField<String>(
+                      value: selectedIcon,
+                      decoration: InputDecoration(labelText: 'Pilih Icon'),
+                      items: iconChoices.keys.map((iconName) {
+                        return DropdownMenuItem<String>(
+                          value: iconName,
+                          child: Row(
+                            children: [
+                              Icon(iconChoices[iconName]),
+                              SizedBox(width: 10),
+                              Text(iconName),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedIcon = value!;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    Text('Pilih Warna'),
+                    BlockPicker(
+                      pickerColor: selectedColor,
+                      onColorChanged: (color) {
+                        setState(() {
+                          selectedColor = color;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Batal')),
-              ElevatedButton(
-                onPressed: () async {
-                  final name = categoryNameController.text.trim();
-                  final icon = selectedIcon;
-                  final color = '#${selectedColor.value.toRadixString(16).substring(2)}'; // hex color
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('Batal')),
+                ElevatedButton(
+                  onPressed: () async {
+                    final name = categoryNameController.text.trim();
+                    final icon = selectedIcon;
+                    final color =
+                        '#${selectedColor.value.toRadixString(16).substring(2)}'; // hex color
 
-                  try {
-                    // Menyimpan kategori
-                    await _categoryService.createCategory(name, widget.token, icon, color);
-                    
-                    // Menutup dialog setelah data berhasil ditambahkan
-                    Navigator.pop(context);
+                    try {
+                      // Menyimpan kategori
+                      await _categoryService.createCategory(
+                          name, widget.token, icon, color);
 
-                    // Memperbarui kategori setelah kategori baru berhasil dibuat
-                    widget.refreshCategories();
-                  } catch (e) {
-                    print('Error: $e');
-                  }
-                },
-                child: Text('Simpan'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+                      // Menutup dialog setelah data berhasil ditambahkan
+                      Navigator.pop(context);
 
-
-
-
+                      // Memperbarui kategori setelah kategori baru berhasil dibuat
+                      widget.refreshCategories();
+                    } catch (e) {
+                      print('Error: $e');
+                    }
+                  },
+                  child: Text('Simpan'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        
         SizedBox(height: 10),
-        
-        // Tampilkan loading atau list kategori
-        widget.isLoading 
-          ? Center(child: CircularProgressIndicator())
-          : Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  Wrap(
-                    spacing: 45,
-                    runSpacing: 10,
-                    children: [
-                      // Tampilkan kategori yang ada
-                      ...widget.categories.take(widget.categories.length > 8 ? 8 : widget.categories.length).map((cat) => Tooltip(
-                        message: cat.name,
-                        child: Container(
-                          width: 55,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            color: cat.getColor(),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(cat.getIconData(), color: Colors.white),
-                                ],
-                              ),   
-                            ],
-                          ),
-                        ),
-                      )),
-                      
-                      // Tampilkan tombol tambah jika kategori kurang dari 8
+        widget.isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Container(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Wrap(spacing: 45, runSpacing: 10, children: [
+                      ...widget.categories
+                          .take(widget.categories.length > 8
+                              ? 8
+                              : widget.categories.length)
+                          .map((cat) => Tooltip(
+                                message: cat.name,
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CategoryPage(
+                                          token: widget.token,
+                                          initialCategoryId: cat.id, 
+                                        ),
+                                      ),
+                                    ).then((value) {
+                                     
+                                      if (value == true) {
+                                        widget.refreshCategories();
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 55,
+                                    height: 55,
+                                    decoration: BoxDecoration(
+                                      color: cat.getColor(),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(cat.getIconData(),
+                                                color: Colors.white),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )),
+
                       if (widget.categories.length < 8)
                         Tooltip(
                           message: "Tambah Kategori",
@@ -203,7 +223,8 @@ void showAddCategoryDialog() {
                               decoration: BoxDecoration(
                                 color: Colors.grey[300],
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.grey, width: 1),
+                                border:
+                                    Border.all(color: Colors.grey, width: 1),
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -213,17 +234,16 @@ void showAddCategoryDialog() {
                                     children: [
                                       Icon(Icons.add, color: Colors.black54),
                                     ],
-                                  ),   
+                                  ),
                                 ],
                               ),
                             ),
                           ),
                         ),
-                    ]
-                  )
-                ],
+                    ])
+                  ],
+                ),
               ),
-            ),
       ],
     );
   }

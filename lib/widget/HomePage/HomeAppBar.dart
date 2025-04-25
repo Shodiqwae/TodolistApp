@@ -3,6 +3,8 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:todolist_app/page/HistoryPage.dart';
+import 'package:todolist_app/widget/HomePage/ProfileModal.dart';
 
 class HomeAppbar extends StatefulWidget {
   final String token;
@@ -25,7 +27,7 @@ class _HomeAppbarState extends State<HomeAppbar> {
 
   Future<void> fetchUserName() async {
     final response = await http.get(
-      Uri.parse("http://192.168.211.57:8000/api/user"),
+      Uri.parse("http://10.0.2.2:8000/api/user"),
       headers: {
         'Authorization': 'Bearer $_token',
         'Accept': 'application/json',
@@ -44,7 +46,7 @@ class _HomeAppbarState extends State<HomeAppbar> {
 
 Future<void> fetchCompletionPercent() async {
   final response = await http.get(
-    Uri.parse("http://192.168.211.57:8000/api/board-completion-percentage"),
+    Uri.parse("http://10.0.2.2:8000/api/board-completion-percentage"),
     headers: {
       'Authorization': 'Bearer $_token',
       'Accept': 'application/json',
@@ -63,7 +65,7 @@ Future<void> fetchCompletionPercent() async {
 
 Future<void> fetchTodayTaskPercent() async {
   final response = await http.get(
-    Uri.parse("http://192.168.211.57:8000/api/today-task-completion"),
+    Uri.parse("http://10.0.2.2:8000/api/today-task-completion"),
     headers: {
       'Authorization': 'Bearer $_token',
       'Accept': 'application/json',
@@ -140,7 +142,7 @@ Future<void> fetchTodayTaskPercent() async {
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(right: 30),
+                margin: EdgeInsets.only(right: 20),
                 child: Column(
                   children: [
                     SizedBox(
@@ -163,12 +165,13 @@ Future<void> fetchTodayTaskPercent() async {
                 ),
               ),
               Container(
-                  margin: EdgeInsets.only(right: 20, top: 30),
-                  child: Column(
-                    children: [
-                      CircleAvatar(),
-                    ],
-                  ))
+                margin: EdgeInsets.only(right: 20,top: 23),
+                child: IconButton(onPressed: () {
+                  showDialog(context: context, builder: (BuildContext context) {
+                    return ProfileModal(token: _token,);
+                  },);
+                }, icon: Icon(Icons.account_circle, size: 35, color: Colors.white,)),
+              )
             ],
           ),
           SizedBox(
@@ -176,104 +179,114 @@ Future<void> fetchTodayTaskPercent() async {
           ),
           Row(
             children: [
-              Container(
-                margin: EdgeInsets.only(left: 15),
-                height: 165,
-                width: 180,
-                decoration: BoxDecoration(
-                    color: Color.fromRGBO(202, 225, 255, 1),
-                    borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                            margin: EdgeInsets.only(top: 10),
-                            child: Text(
-                              "Today's Task Complete",
-                              style: TextStyle(
-                                  color: Color.fromRGBO(13, 71, 161, 1),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Historypage(token: _token)));
+                },
+                child: Container(
+                  margin: EdgeInsets.only(left: 15),
+                  height: 165,
+                  width: 180,
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(202, 225, 255, 1),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                              margin: EdgeInsets.only(top: 10),
+                              child: Text(
+                                "Today's Task Complete",
+                                style: TextStyle(
+                                    color: Color.fromRGBO(13, 71, 161, 1),
+                                    fontFamily: "Mont-SemiBold",
+                                    fontSize: 12),
+                              ))
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            child: CircularPercentIndicator(
+                              radius: 54.0,
+                              lineWidth: 10.0,
+                              percent: todayPercent,
+                              center: Text(
+                                "${(todayPercent * 100).toStringAsFixed(0)}%",
+                                style: TextStyle(
                                   fontFamily: "Mont-SemiBold",
-                                  fontSize: 12),
-                            ))
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          child: CircularPercentIndicator(
-                            radius: 54.0,
-                            lineWidth: 10.0,
-                            percent: todayPercent,
-                            center: Text(
-                              "${(todayPercent * 100).toStringAsFixed(0)}%",
-                              style: TextStyle(
-                                fontFamily: "Mont-SemiBold",
-                                color: Color.fromRGBO(13, 71, 161, 1),
+                                  color: Color.fromRGBO(13, 71, 161, 1),
+                                ),
                               ),
+                              progressColor: Color.fromRGBO(13, 71, 161, 1),
+                              backgroundColor: Colors.grey.shade300,
+                              circularStrokeCap: CircularStrokeCap.round,
                             ),
-                            progressColor: Color.fromRGBO(13, 71, 161, 1),
-                            backgroundColor: Colors.grey.shade300,
-                            circularStrokeCap: CircularStrokeCap.round,
-                          ),
-                        )
-                      ],
-                    )
-                  ],
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(left: 20),
-                height: 165,
-                width: 180,
-                decoration: BoxDecoration(
-                    color: Color.fromRGBO(243, 229, 245, 1),
-                    borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                            margin: EdgeInsets.only(top: 10),
-                            child: Text(
-                              "Total Task Complete",
-                              style: TextStyle(
-                                  color: Color.fromRGBO(74, 20, 140, 1),
-                                  fontFamily: "Mont-SemiBold",
-                                  fontSize: 12),
-                            ))
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          child: CircularPercentIndicator(
-                            radius: 54.0,
-                            lineWidth: 10.0,
-                            percent: completionPercent,
-                            center: Text(
-                                "${(completionPercent * 100).toStringAsFixed(0)}%",
+              GestureDetector(
+                onTap: () {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Historypage(token: _token)));
+                },
+                child: Container(
+                  margin: EdgeInsets.only(left: 20),
+                  height: 165,
+                  width: 180,
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(243, 229, 245, 1),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                              margin: EdgeInsets.only(top: 10),
+                              child: Text(
+                                "Total Task Complete",
                                 style: TextStyle(
+                                    color: Color.fromRGBO(74, 20, 140, 1),
                                     fontFamily: "Mont-SemiBold",
-                                    color: Color.fromRGBO(74, 20, 140, 1))),
-                            progressColor: Color.fromRGBO(74, 20, 140, 1),
-                            backgroundColor: Colors.grey.shade300,
-                            circularStrokeCap: CircularStrokeCap.round,
-                          ),
-                        )
-                      ],
-                    )
-                  ],
+                                    fontSize: 12),
+                              ))
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            child: CircularPercentIndicator(
+                              radius: 54.0,
+                              lineWidth: 10.0,
+                              percent: completionPercent,
+                              center: Text(
+                                  "${(completionPercent * 100).toStringAsFixed(0)}%",
+                                  style: TextStyle(
+                                      fontFamily: "Mont-SemiBold",
+                                      color: Color.fromRGBO(74, 20, 140, 1))),
+                              progressColor: Color.fromRGBO(74, 20, 140, 1),
+                              backgroundColor: Colors.grey.shade300,
+                              circularStrokeCap: CircularStrokeCap.round,
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ],

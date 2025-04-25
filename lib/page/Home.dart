@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _token = widget.token; // <-- pindahkan ini ke atas dulu
+    _token = widget.token; 
     _loadCategories();
     futureTasks = fetchTasks(_token);
     loadTasks();
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
 
   void loadTasks() {
     setState(() {
-      futureTasks = fetchTasks(_token); // fungsi dari TaskService atau semacamnya
+      futureTasks = fetchTasks(_token); 
     });
   }
 
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
   }
 
  Future<List<Board>> getTodayTasks() async {
-  final String baseUrl = 'http://192.168.211.57:8000'; // Ganti dengan URL API kamu
+  final String baseUrl = 'http://10.0.2.2:8000'; // Ganti dengan URL API kamu
   final response = await http.get(
     Uri.parse('$baseUrl/api/today-tasks'),
     headers: {
@@ -255,7 +255,11 @@ class _HomePageState extends State<HomePage> {
                                   fontSize: 17)))
                     ],
                   ),
-                  TodayTaskList(future: _todayTasks)
+                  TodayTaskList(future: _todayTasks,onRefreshNeeded: () {
+    setState(() {
+      _todayTasks = getTodayTasks(); // Create a fresh future
+    });
+  })
                 ],
               ),
 

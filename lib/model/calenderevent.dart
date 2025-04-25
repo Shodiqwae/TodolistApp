@@ -2,6 +2,7 @@ class CalendarEvent {
   final String type;
   final String title;
   final DateTime date;
+  
 
   CalendarEvent({required this.type, required this.title, required this.date});
 
@@ -12,6 +13,11 @@ class CalendarEvent {
       date: DateTime.parse(json['date']),
     );
   }
+factory CalendarEvent.empty() {
+  return CalendarEvent(title: '', type: '', date: DateTime(2000));
+}
+
+bool get isEmpty => title == '' && type == '';
 
   @override
   String toString() => '$title (${typeLabel()})';

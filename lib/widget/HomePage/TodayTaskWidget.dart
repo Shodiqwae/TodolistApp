@@ -7,17 +7,35 @@ import 'package:http/http.dart' as http;
 
 class TodayTaskList extends StatefulWidget {
   final Future<List<Board>> future;
+    final VoidCallback onRefreshNeeded; // Add this
 
-  const TodayTaskList({super.key, required this.future});
+
+  const TodayTaskList({super.key, required this.future, required this.onRefreshNeeded,});
 
   @override
   State<TodayTaskList> createState() => _TodayTaskListState();
 }
 
 class _TodayTaskListState extends State<TodayTaskList> {
+  
+  @override
+  void initState() {
+    super.initState();
+     widget.future;
+  }
+  
+  // Method to refresh the data
+  void refreshData() {
+    widget.onRefreshNeeded(); // Call the parent's refresh method
+    setState(() {
+        widget.future;
+    });
+  }
+
+  
   Future<Task> fetchTaskById(int taskId) async {
   // Implementasikan API atau logic untuk mengambil Task berdasarkan taskId
-  final response = await http.get(Uri.parse('http://192.168.211.57:8000/api/task/$taskId'));
+  final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/task/$taskId'));
   if (response.statusCode == 200) {
     return Task.fromJson(jsonDecode(response.body));
   } else {
@@ -62,10 +80,18 @@ class _TodayTaskListState extends State<TodayTaskList> {
                     final board = boards[index];
                     return InkWell(
                       
-                      onTap: () async {
-                         final task = await fetchTaskById(board.tasksId!);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => DetailTask(task: task )));
-                      },
+                       onTap: () async {
+          final task = await fetchTaskById(board.tasksId!);
+          final result = await Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (context) => DetailTask(task: task))
+          );
+          
+          // Check if we need to refresh data
+          if (result == true) {
+            refreshData();
+          }
+        },
                       child: Container(
                         width: MediaQuery.of(context).size.width * 0.8,
                         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
@@ -73,6 +99,14 @@ class _TodayTaskListState extends State<TodayTaskList> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+        color: Colors.black.withOpacity(0.1), // warna bayangan dengan transparansi
+        spreadRadius: 2, // seberapa jauh bayangan menyebar
+        blurRadius: 1, // seberapa blur bayangannya
+        offset: Offset(0, 3), // posisi bayangan (x, y)
+      ),
+                          ]
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,

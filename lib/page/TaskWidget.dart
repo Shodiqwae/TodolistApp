@@ -17,7 +17,7 @@ class TaskWidget extends StatefulWidget {
 class _TaskWidgetState extends State<TaskWidget> {
   Future<void> deleteTask(int id) async {
   final response = await http.delete(
-    Uri.parse('http://192.168.211.57:8000/api/tasks/$id'),
+    Uri.parse('http://10.0.2.2:8000/api/tasks/$id'),
   );
 
   if (response.statusCode == 200) {
