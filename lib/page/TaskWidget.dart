@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shimmer/shimmer.dart';
 import 'package:todolist_app/model/taskmodel.dart';
 import 'package:todolist_app/page/DetailTask.dart';
 
 class TaskWidget extends StatefulWidget {
   final Future<List<Task>> futuretasks;
   final String token;
-
 
   TaskWidget({required this.futuretasks, required this.token});
 
@@ -15,32 +15,29 @@ class TaskWidget extends StatefulWidget {
 }
 
 class _TaskWidgetState extends State<TaskWidget> {
-  Future<void> deleteTask(int id) async {
-  final response = await http.delete(
-    Uri.parse('http://10.0.2.2:8000/api/tasks/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    setState(() {
-  currentTasks.removeWhere((task) => task.id == id);
-});
-
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Task berhasil dihapus')),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Gagal menghapus task')),
-    );
-  }
-}
-
   List<Task> currentTasks = [];
 
+  Future<void> deleteTask(int id) async {
+    final response = await http.delete(
+      Uri.parse('http://192.168.41.57:8000/api/tasks/$id'),
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        currentTasks.removeWhere((task) => task.id == id);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task berhasil dihapus')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus task')),
+      );
+    }
+  }
 
   void confirmDelete(int id) {
-    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -48,12 +45,12 @@ class _TaskWidgetState extends State<TaskWidget> {
         content: Text("Yakin ingin menghapus task ini?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), // batal
+            onPressed: () => Navigator.pop(context),
             child: Text("Tidak"),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // tutup dialog
+              Navigator.pop(context);
               deleteTask(id);
             },
             child: Text("Iya"),
@@ -63,125 +60,231 @@ class _TaskWidgetState extends State<TaskWidget> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: FutureBuilder<List<Task>>(
-        future: widget.futuretasks, // Gunakan futuretasks yang dikirim dari HomePage
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No tasks available.'));
-          } else {
-          currentTasks = snapshot.data!;
-      
-            return SizedBox(
-              width: 370,
-              height: 520,
-              child: ListView.builder(
-                itemCount: currentTasks.length,
-                itemBuilder: (context, index) {
-                  final task = currentTasks[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => DetailTask(task: task)));
-      
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Material(
-                        elevation: 6,
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          height: 150,
-                          width: 300,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
+@override
+Widget build(BuildContext context) {
+  return FutureBuilder<List<Task>>(
+    future: widget.futuretasks,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return ShimmerLoading();
+      } else if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        return Center(child: Text('No tasks available.'));
+      } else {
+        currentTasks = snapshot.data!;
+        currentTasks.sort((a, b) {
+          int getPriorityValue(String priority) {
+            switch (priority.toLowerCase()) {
+              case 'urgent':
+                return 1;
+              case 'high':
+                return 2;
+              case 'netral':
+                return 3;
+              case 'low':
+                return 4;
+              default:
+                return 5;
+            }
+          }
+
+          return getPriorityValue(a.priority).compareTo(getPriorityValue(b.priority));
+        });
+
+        return Container(
+          color: const Color.fromARGB(255, 234, 234, 234),
+          height: 620, // Ensure the container fills the screen height
+          child: CustomScrollView(
+            scrollDirection: Axis.vertical,
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.all(10),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final task = currentTasks[index];
+                      Color priorityColor;
+                      switch (task.priority.toLowerCase()) {
+                        case 'urgent':
+                          priorityColor = Colors.red;
+                          break;
+                        case 'high':
+                          priorityColor = Colors.orange;
+                          break;
+                        case 'netral':
+                          priorityColor = Colors.blue;
+                          break;
+                        case 'low':
+                          priorityColor = Colors.green;
+                          break;
+                        default:
+                          priorityColor = Colors.grey;
+                      }
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context, MaterialPageRoute(builder: (_) => DetailTask(task: task)));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Material(
+                            elevation: 6,
                             borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            child: Container(
+                              height: 130,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      task.name,
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: "Mont-SemiBold",
-                                        fontSize: 17,
-                                      ),
-                                    ),
                                     Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                          decoration: BoxDecoration(
-                                            color: task.categoryColor.isNotEmpty
-                                                ? Color(int.parse('0xFF${task.categoryColor.substring(1)}'))
-                                                : Colors.grey,
-                                            borderRadius: BorderRadius.circular(20),
-                                          ),
-                                          child: Text(
-                                            task.categoryName,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontFamily: "Mont-SemiBold",
-                                              fontSize: 13,
-                                            ),
+                                        Text(
+                                          task.name,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontFamily: "Mont-SemiBold",
+                                            fontSize: 17,
                                           ),
                                         ),
-                                        SizedBox(width: 8),
-                                        // IconButton(
-                                        //   icon: Icon(Icons.delete, color: Colors.red),
-                                        //   onPressed: () => confirmDelete(task.id),
-                                        // ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                              decoration: BoxDecoration(
+                                                color: task.categoryColor.isNotEmpty
+                                                    ? Color(int.parse('0xFF${task.categoryColor.substring(1)}'))
+                                                    : Colors.grey,
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                task.categoryName,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontFamily: "Mont-SemiBold",
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      "Priority: ${task.priority}",
+                                      style: TextStyle(
+                                        color: priorityColor,
+                                        fontSize: 15,
+                                        fontFamily: "Mont-SemiBold",
+                                      ),
+                                    ),
+                                    SizedBox(height: 20),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_month_outlined, size: 20, color: Colors.black54),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          task.createdAt.split('T')[0],
+                                          style: TextStyle(
+                                            fontFamily: "Mont-SemiBold",
+                                            color: Colors.black54,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 5),
-                                Text(
-                                  "Priority: ${task.priority}",
-                                  style: TextStyle(
-                                    color: Color.fromRGBO(94, 92, 92, 1),
-                                    fontSize: 12,
-                                    fontFamily: "Mont-SemiBold",
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                Row(
-                                  children: [
-                                    Icon(Icons.calendar_month_outlined,
-                                        color: Color.fromRGBO(56, 48, 48, 1), size: 20),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      task.createdAt.split('T')[0],
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(56, 48, 48, 1),
-                                        fontFamily: "Mont-SemiBold",
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                },
+                      );
+                    },
+                    childCount: currentTasks.length,
+                  ),
+                ),
               ),
-            );
-          }
-        },
+            ],
+          ),
+        );
+      }
+    },
+  );
+}
+
+}
+
+class ShimmerLoading extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 300,
+      child: ListView.builder(
+        itemCount: 4,
+        padding: EdgeInsets.all(10),
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              height: 130,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 10,
+                          color: Colors.white,
+                        ),
+                        Container(
+                          width: 60,
+                          height: 10,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Container(
+                      width: 80,
+                      height: 10,
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_month_outlined, size: 20, color: Colors.black54),
+                        SizedBox(width: 6),
+                        Container(
+                          width: 50,
+                          height: 10,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -34,7 +34,7 @@ class _DetailTaskState extends State<DetailTask> {
   bool isLoading = false;
   DateTime? selectedDueDate;
 
-  final String baseUrl = "http://10.0.2.2:8000/api";
+  final String baseUrl = "http://192.168.41.57:8000/api";
 
   // Text controllers
   TextEditingController nameController = TextEditingController();
@@ -196,8 +196,8 @@ class _DetailTaskState extends State<DetailTask> {
   Future<void> _selectDueDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: selectedDueDate ?? DateTime.now(), // Default to today
-      firstDate: DateTime(2000),
+      initialDate: selectedDueDate ?? DateTime.now(), 
+      firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     );
     if (pickedDate != null && pickedDate != selectedDueDate) {
@@ -489,7 +489,7 @@ class _DetailTaskState extends State<DetailTask> {
                 final picked = await showDatePicker(
                   context: context,
                   initialDate: DateTime.now(),
-                  firstDate: DateTime(2020),
+                  firstDate: DateTime.now(),
                   lastDate: DateTime(2100),
                 );
                 if (picked != null) {

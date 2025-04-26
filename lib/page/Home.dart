@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _token = widget.token; 
+    _token = widget.token;
     _loadCategories();
     futureTasks = fetchTasks(_token);
     loadTasks();
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
 
   void loadTasks() {
     setState(() {
-      futureTasks = fetchTasks(_token); 
+      futureTasks = fetchTasks(_token);
     });
   }
 
@@ -134,8 +134,8 @@ class _HomePageState extends State<HomePage> {
           );
         });
         break;
-                case 3:
-         Future.delayed(Duration(milliseconds: 750), () {
+      case 3:
+        Future.delayed(Duration(milliseconds: 750), () {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -155,23 +155,22 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
- Future<List<Board>> getTodayTasks() async {
-  final String baseUrl = 'http://10.0.2.2:8000'; // Ganti dengan URL API kamu
-  final response = await http.get(
-    Uri.parse('$baseUrl/api/today-tasks'),
-    headers: {
-      'Authorization': 'Bearer $_token', // Mengirimkan token sebagai header
-    },
-  );
+  Future<List<Board>> getTodayTasks() async {
+    final String baseUrl = 'http://192.168.41.57:8000'; // Ganti dengan URL API kamu
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/today-tasks'),
+      headers: {
+        'Authorization': 'Bearer $_token', // Mengirimkan token sebagai header
+      },
+    );
 
-  if (response.statusCode == 200) {
-    final List<dynamic> data = json.decode(response.body);
-    return data.map((boardJson) => Board.fromJson(boardJson)).toList();
-  } else {
-    throw Exception('Failed to load tasks');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((boardJson) => Board.fromJson(boardJson)).toList();
+    } else {
+      throw Exception('Failed to load tasks');
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -199,33 +198,32 @@ class _HomePageState extends State<HomePage> {
                             fontSize: 17)),
                   ),
                   InkWell(
-  onTap: () async {
-    // Tunggu hasil dari halaman CategoryPage
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CategoryPage(token: _token),
-      ),
-    );
+                    onTap: () async {
+                      // Tunggu hasil dari halaman CategoryPage
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CategoryPage(token: _token),
+                        ),
+                      );
 
-    // Jika ada hasil (misalnya return true dari CategoryPage), refresh
-    if (result == true) {
-      _loadCategories();
-    }
-  },
-  child: Container(
-    margin: EdgeInsets.only(right: 33),
-    child: Text(
-      'See All',
-      style: TextStyle(
-        fontFamily: "Mont-SemiBold",
-        color: Color.fromRGBO(97, 119, 140, 1),
-        fontSize: 17,
-      ),
-    ),
-  ),
-),
-
+                      // Jika ada hasil (misalnya return true dari CategoryPage), refresh
+                      if (result == true) {
+                        _loadCategories();
+                      }
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(right: 33),
+                      child: Text(
+                        'See All',
+                        style: TextStyle(
+                          fontFamily: "Mont-SemiBold",
+                          color: Color.fromRGBO(97, 119, 140, 1),
+                          fontSize: 17,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 10),
@@ -255,11 +253,14 @@ class _HomePageState extends State<HomePage> {
                                   fontSize: 17)))
                     ],
                   ),
-                  TodayTaskList(future: _todayTasks,onRefreshNeeded: () {
-    setState(() {
-      _todayTasks = getTodayTasks(); // Create a fresh future
-    });
-  })
+                  TodayTaskList(
+                      future: _todayTasks,
+                      onRefreshNeeded: () {
+                        setState(() {
+                          _todayTasks =
+                              getTodayTasks(); // Create a fresh future
+                        });
+                      })
                 ],
               ),
 
@@ -270,7 +271,7 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: BottomBarBubble(
         color: const Color.fromARGB(255, 255, 255, 255),
-        backgroundColor: Color.fromRGBO(19, 86, 148, 1),
+        backgroundColor: Color(0xFF1B56FD),
         items: [
           BottomBarItem(
             iconData: Icons.home,

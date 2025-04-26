@@ -43,7 +43,7 @@ class _ProfileModalState extends State<ProfileModal> {
   // Fungsi untuk mengambil data profile
   Future<Map<String, dynamic>> getProfile() async {
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/getprofile'),
+      Uri.parse('http://192.168.41.57:8000/api/getprofile'),
       headers: {
         'Authorization': 'Bearer $_token',
         'Accept': 'application/json',
@@ -66,7 +66,7 @@ class _ProfileModalState extends State<ProfileModal> {
   // Fungsi untuk update profile
 Future<void> _updateProfile() async {
   final response = await http.put(
-    Uri.parse('http://10.0.2.2:8000/api/updateprofile'),
+    Uri.parse('http://192.168.41.57:8000/api/updateprofile'),
     headers: {
       'Authorization': 'Bearer $_token',
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -91,7 +91,7 @@ Future<void> _updateProfile() async {
   // Fungsi untuk logout
   Future<void> _logout() async {
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/logout'),
+      Uri.parse('http://192.168.41.57:8000/api/logout'),
       headers: {
         'Authorization': 'Bearer $_token',
       },

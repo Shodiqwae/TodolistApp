@@ -35,7 +35,7 @@ class _HistorypageState extends State<Historypage> {
   Future<List<Board>> getDoneBoard() async {
     try {
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:8000/api/done-board"),
+        Uri.parse("http://192.168.41.57:8000/api/done-board"),
         headers: {
           'Authorization': 'Bearer $_token',
           'Accept': 'application/json',
@@ -63,7 +63,7 @@ class _HistorypageState extends State<Historypage> {
   // Fungsi untuk menghapus task tertentu
   Future<void> deleteboard(int taskId) async {
     final response = await http.delete(
-      Uri.parse("http://10.0.2.2:8000/api/delete-board/$taskId"),
+      Uri.parse("http://192.168.41.57:8000/api/delete-board/$taskId"),
       headers: {
         'Authorization': 'Bearer $_token',
         'Accept': 'application/json',
@@ -180,8 +180,8 @@ class _HistorypageState extends State<Historypage> {
             height: 90,
             decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [
-              Color.fromRGBO(19, 86, 148, 1),
-              Color.fromRGBO(0, 102, 204, 1)
+              Color(0xFF0118D8),
+              Color(0xFF1B56FD),
             ])),
             child: Column(
               children: [
@@ -195,7 +195,7 @@ class _HistorypageState extends State<Historypage> {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: "Mont-SemiBold",
-                                fontSize: 20))),
+                                fontSize: 25))),
                     Row(
                       children: [
                         if (selectionMode && selectedCards.isNotEmpty) ...[
@@ -250,8 +250,8 @@ class _HistorypageState extends State<Historypage> {
                                 final board = boards[index];
                                 return GestureDetector(
                                     onTap: () {
-                                      if (selectionMode) {
-                                        setState(() {
+                                      setState(() {
+                                        if (selectionMode) {
                                           if (selectedCards.contains(index)) {
                                             selectedCards.remove(index);
                                             if (selectedCards.isEmpty) {
@@ -260,10 +260,11 @@ class _HistorypageState extends State<Historypage> {
                                           } else {
                                             selectedCards.add(index);
                                           }
-                                        });
-                                      } else {
-                                        // bisa arahkan ke detail board atau fungsi lainnya
-                                      }
+                                        } else {
+                                          // Aksi kalau tidak dalam selectionMode
+                                          // Misalnya buka detail board
+                                        }
+                                      });
                                     },
                                     onLongPress: () {
                                       setState(() {
@@ -276,14 +277,20 @@ class _HistorypageState extends State<Historypage> {
                                           horizontal: 20, vertical: 0),
                                       child: GestureDetector(
                                         onTap: () {
-                                          // Menambahkan atau menghapus index ke dalam selectedCards
-                                          setState(() {
-                                            if (selectedCards.contains(index)) {
-                                              selectedCards.remove(index);
-                                            } else {
-                                              selectedCards.add(index);
-                                            }
-                                          });
+                                          if (selectionMode) {
+                                            setState(() {
+                                              if (selectedCards
+                                                  .contains(index)) {
+                                                selectedCards.remove(index);
+                                                if (selectedCards.isEmpty)
+                                                  selectionMode = false;
+                                              } else {
+                                                selectedCards.add(index);
+                                              }
+                                            });
+                                          } else {
+                                            // Arahkan ke detail board atau tidak melakukan apa-apa
+                                          }
                                         },
                                         child: Container(
                                           margin: EdgeInsets.symmetric(
@@ -308,17 +315,16 @@ class _HistorypageState extends State<Historypage> {
                                                 ? [BoxShadow()]
                                                 : [
                                                     BoxShadow(
-                                                      color: const Color
-                                                              .fromARGB(
-                                                              255, 108, 16, 16)
-                                                          .withOpacity(
-                                                              0.1), // warna bayangan dengan transparansi
-                                                      spreadRadius:
-                                                          2, // seberapa jauh bayangan menyebar
-                                                      blurRadius:
-                                                          1, // seberapa blur bayangannya
-                                                      offset: Offset(0,
-                                                          3), // posisi bayangan (x, y)
+                                                      color:
+                                                          const Color.fromARGB(
+                                                                  255,
+                                                                  108,
+                                                                  16,
+                                                                  16)
+                                                              .withOpacity(0.1),
+                                                      spreadRadius: 2,
+                                                      blurRadius: 1,
+                                                      offset: Offset(0, 3),
                                                     ),
                                                   ],
                                           ),
@@ -431,7 +437,7 @@ class _HistorypageState extends State<Historypage> {
       ),
       bottomNavigationBar: BottomBarBubble(
         color: const Color.fromARGB(255, 255, 255, 255),
-        backgroundColor: Color.fromRGBO(19, 86, 148, 1),
+        backgroundColor: Color(0xFF1B56FD),
         items: [
           BottomBarItem(
             iconData: Icons.home,

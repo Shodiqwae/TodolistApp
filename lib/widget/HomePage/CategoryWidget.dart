@@ -1,6 +1,7 @@
 // TODO Implement this library.import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:todolist_app/model/category.dart';
 import 'package:todolist_app/page/CategoryPage.dart';
 import 'package:todolist_app/service/categoryservice.dart';
@@ -158,7 +159,27 @@ class _CategoryWidgetState extends State<CategoryWidget> {
       children: [
         SizedBox(height: 10),
         widget.isLoading
-            ? Center(child: CircularProgressIndicator())
+            ?Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Wrap(
+                spacing: 45,
+                runSpacing: 10,
+                children: List.generate(8, (index) {
+                  return Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      width: 55,
+                      height: 55,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            )
             : Container(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Column(

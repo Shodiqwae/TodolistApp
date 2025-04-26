@@ -33,7 +33,7 @@ class BoardsSection extends StatelessWidget {
         children: statusList.map((status) {
           final boardsInStatus = boardsByStatus[status.name] ?? [];
           final statusColor = getStatusColor(status.name);
-          
+
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -56,10 +56,13 @@ class BoardsSection extends StatelessWidget {
                       onTap: () => onBoardTap(board),
                     );
                   }).toList(),
-                  AddBoardButton(
-                    statusColor: statusColor,
-                    onPressed: () => onAddBoard(status.name),
-                  )
+                  if (status.name == "pending")
+                    AddBoardButton(
+                      statusColor: statusColor,
+                      onPressed: () => onAddBoard(status.name),
+                    )
+                  else
+                    SizedBox.shrink()
                 ],
               ),
             ),

@@ -42,7 +42,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Future<void> fetchCalendarEvents() async {
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/calendar-events'),
+      Uri.parse('http://192.168.41.57:8000/api/calendar-events'),
       headers: {
         'Authorization': 'Bearer $_token',
         'Accept': 'application/json',
@@ -115,10 +115,28 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Kalender Tugas', style: TextStyle(color: Colors.white, fontFamily: "Mont-SemiBold"),),
-        backgroundColor: const Color.fromARGB(255, 20, 61, 227),
+  automaticallyImplyLeading: false,
+  title: const Text(
+    'Kalender Tugas',
+    style: TextStyle(
+      color: Colors.white,
+      fontFamily: "Mont-SemiBold",
+    ),
+  ),
+  flexibleSpace: Container(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+         Color(0xFF0118D8), 
+            Color(0xFF1B56FD), // Warna bawah (misalnya biru muda)
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
       ),
+    ),
+  ),
+),
+
       body: Column(
         children: [
           TableCalendar<CalendarEvent>(
@@ -156,7 +174,7 @@ class _CalendarPageState extends State<CalendarPage> {
       ),
       bottomNavigationBar: BottomBarBubble(
         color: const Color.fromARGB(255, 255, 255, 255),
-        backgroundColor: Color.fromRGBO(19, 86, 148, 1),
+        backgroundColor:  Color(0xFF1B56FD),
         items: [
           BottomBarItem(
             iconData: Icons.home,

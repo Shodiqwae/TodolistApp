@@ -110,8 +110,8 @@ class _TaskState extends State<TaskPage> {
               height: 150,
               decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
-                Color.fromRGBO(19, 86, 148, 1),
-                Color.fromRGBO(0, 102, 204, 1)
+                Color(0xFF0118D8), 
+            Color(0xFF1B56FD), 
               ])),
               child: Column(
                 children: [
@@ -130,19 +130,11 @@ class _TaskState extends State<TaskPage> {
                                 fontSize: 23,
                                 fontFamily: "Mont-Bold"),
                           )),
-                      Container(
-                          margin: EdgeInsets.only(right: 20),
-                          child: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.sort,
-                                size: 35,
-                                color: Colors.white,
-                              )))
+                   
                     ],
                   ),
                   SizedBox(
-                    height: 5,
+                    height: 20,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -170,9 +162,16 @@ class _TaskState extends State<TaskPage> {
                 ],
               ),
             ),
-            TaskWidget(
-              futuretasks: futureTasks,
-              token: _token,
+            Container(
+               height: 620,
+              child: Expanded(
+                child: SingleChildScrollView(
+                  child: TaskWidget(
+                    futuretasks: futureTasks,
+                    token: _token,
+                  ),
+                ),
+              ),
             )
           ],
         ),
@@ -187,12 +186,12 @@ class _TaskState extends State<TaskPage> {
             ),
           );
         },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        child: Icon(Icons.add,color: Colors.white,),
+        backgroundColor: Color(0xFF1B56FD),
       ),
       bottomNavigationBar: BottomBarBubble(
         color: const Color.fromARGB(255, 255, 255, 255),
-        backgroundColor: Color.fromRGBO(19, 86, 148, 1),
+        backgroundColor: Color(0xFF1B56FD),
         items: [
           BottomBarItem(
             iconData: Icons.home,
